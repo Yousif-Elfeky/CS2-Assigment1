@@ -6,8 +6,10 @@ set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    message(FATAL_ERROR "This project requires Clang as the C++ compiler.")
+find_program(CLANG_COMPILER NAME clang++)
+
+if(CLANG_COMPILER)
+    set(CMAKE_CXX_COMPILER ${CLANG_COMPILER})
 endif()
 
 add_library(app_lib
