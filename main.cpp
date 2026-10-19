@@ -1,8 +1,5 @@
 #include <iostream>
 
-#include "greeting.hpp"
+#include "entity.hpp"
 
-int main() {
-    std::cout << greeting() << '\n';
-    return 0;
-}
+int main() { return 0; }

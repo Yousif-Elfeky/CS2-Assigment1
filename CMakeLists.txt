@@ -13,7 +13,7 @@ if(CLANG_COMPILER)
 endif()
 
 add_library(app_lib
-    src/greeting.cpp
+    src/entity.cpp
 )
 
 target_include_directories(app_lib
