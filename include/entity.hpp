@@ -5,11 +5,11 @@ class entity {
  protected:
   std::string m_name;
   size_t m_id;
-  double m_hp;
-  double m_maxHP;
+  int m_hp;
+  int m_maxHP;
 
  public:
-  entity(const std::string&, size_t, double);
+  entity(const std::string&, size_t, int);
 
   // vitual destructor
   virtual ~entity();
@@ -18,10 +18,10 @@ class entity {
 
   // core methods that are shared (don't need overrideding)
   const std::string& getName() const;
-  double getHP() const;
-  double getMaxHP() const;
+  int getHP() const;
+  int getMaxHP() const;
   size_t getID() const;
   bool isAlive() const;
-  void takeDamage(double);
-  void receiveHealing(double);
+  void takeDamage(int);
+  void receiveHealing(int);
 };
