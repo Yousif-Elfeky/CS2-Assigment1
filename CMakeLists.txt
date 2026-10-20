@@ -17,6 +17,7 @@ add_library(app_lib
     src/healer.cpp
     src/cleric.cpp
     src/druid.cpp
+    src/paladin.cpp
 )
 
 target_include_directories(app_lib
