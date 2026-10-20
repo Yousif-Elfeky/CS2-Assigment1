@@ -15,8 +15,6 @@ class entity {
   virtual ~entity();
 
   // core methods to be overriden
-  virtual void doNormalAttack(entity&) = 0;
-  virtual void doSpecialAttack(entity&) = 0;
   virtual void print() const = 0;
 
   // core methods that are shared (don't need overrideding)

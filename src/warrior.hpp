@@ -1,20 +1,10 @@
 #include "warrior.hpp"
 #include <iostream>
+#include <cstdlib>
 
 warrior::warrior(const std::string& name, size_t id, int hp, int speed, int attackDamage, 
-    int intimidate): entity(name, id, hp, speed), m_attackDamage(attackDamage), 
+    int intimidate): damager(name, id, hp, speed, attackDamage), 
     m_intimidate(intimidate) {}
-
-void warrior::doNormalAttack(entity& target) 
-{
-    std::cout << m_name << " slashes " << target.getName() << " for " << m_attackDamage << " damage\n";
-    target.takeDamage(m_attackDamage);
-    std::cout << target.getName() << "'s health is now " << target.getHP() << "\n";
-    if (!target.isAlive())
-    {
-        std::cout << target.getName() << " has been slain!\n";
-    }
-}
 
 void warrior::doSpecialAttack(entity& target) 
 {
@@ -37,5 +27,6 @@ void warrior::print() const {
               << " | HP: " << m_hp 
               << " | Speed: " << m_speed 
               << " | Attack Damage: " << m_attackDamage 
-              << " | Intimidate: " << m_intimidate << "\n";
+              << " | Special: Intimidate (Medium Success Rate)\n";
+              << " | Basic front line attacker. Can attempt to intimidate foes to stun them for one turn \n";
 }
