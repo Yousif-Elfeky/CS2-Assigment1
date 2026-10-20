@@ -6,6 +6,7 @@ class entity {
   std::string m_name;
   size_t m_id;
   double m_hp;
+  double m_maxHP;
 
  public:
   entity(const std::string&, size_t, double);
@@ -13,15 +14,14 @@ class entity {
   // vitual destructor
   virtual ~entity();
 
-  // core methods to be overriden
-  virtual void doNormalAttack(entity&) = 0;
-  virtual void doSpicialAttack(entity&) = 0;
   virtual void print() const = 0;
 
   // core methods that are shared (don't need overrideding)
   const std::string& getName() const;
   double getHP() const;
+  double getMaxHP() const;
   size_t getID() const;
   bool isAlive() const;
   void takeDamage(double);
+  void receiveHealing(double);
 };
