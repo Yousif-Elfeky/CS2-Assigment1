@@ -3,6 +3,8 @@
 #include <iostream>
 #include <utility>
 
+#include "controller.hpp"
+
 void simulation::addEntity(std::unique_ptr<entity> entityPtr) {
   if (entityPtr) m_entities.push_back(std::move(entityPtr));
 }
@@ -49,6 +51,51 @@ entity* simulation::findTarget(const entity& who, targetSide side) const {
   }
 
   return bestTarget;
+}
+
+void simulation::runRound(controller& playerController,
+                          controller& environmentController) {
+  if (m_state != gameState::ongoing) {
+    std::cout << "the game is already over.\n";
+    return;
+  }
+
+  ++m_round;
+  std::cout << "--- Round " << m_round << " ---\n";
+
+  runPhase(faction::player, playerController);
+  removeDefeated();
+  updateGameState();
+
+  if (m_state == gameState::ongoing) {
+    runPhase(faction::environment, environmentController);
+    removeDefeated();
+    updateGameState();
+  }
+
+  if (m_state == gameState::playerWon) {
+    std::cout << "player wins.\n";
+  } else if (m_state == gameState::environmentWon) {
+    std::cout << "environment wins.\n";
+  }
+}
+
+void simulation::runPhase(faction team, controller& unitController) {
+  for (auto& entityPtr : m_entities) {
+    if (m_state != gameState::ongoing) return;
+    if (entityPtr->getFaction() != team || !entityPtr->isAlive()) continue;
+
+    // restore action points for the entity at the start of its turn
+    entityPtr->restoreActionPoints();
+    while (entityPtr->isAlive() && entityPtr->getActionPoints() > 0 &&
+           m_state == gameState::ongoing) {
+      // ask the controller to take an action for this entity. if it returns
+      // false or we run out of action points, the entity is done for this
+      // round.
+      if (!unitController.takeAction(*entityPtr, *this)) break;
+      updateGameState();
+    }
+  }
 }
 
 void simulation::removeDefeated() {

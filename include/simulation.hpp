@@ -5,6 +5,8 @@
 
 #include "entity.hpp"
 
+class controller;
+
 enum class gameState { ongoing, playerWon, environmentWon };
 
 // main simulator of the world. owns entities and advances the world one turn at
@@ -20,6 +22,8 @@ class simulation {
   // find the target with the lowest health ratio (current/max) for a given
   // entity and target side
   entity* findTarget(const entity&, targetSide) const;
+  // run a round of the simulation, where each entity gets to act once.
+  void runRound(controller&, controller&);
   void printEntities() const;
 
   bool hasLiving(faction) const;
@@ -27,6 +31,7 @@ class simulation {
   size_t getRound() const;
 
  private:
+  void runPhase(faction, controller&);
   void removeDefeated();
   void updateGameState();
 
