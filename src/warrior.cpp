@@ -2,8 +2,8 @@
 #include <iostream>
 #include <cstdlib>
 
-warrior::warrior(const std::string& name, size_t id, int hp, int speed, int attackDamage, 
-    int intimidate): damager(name, id, hp, speed, attackDamage), 
+warrior::warrior(const std::string& name, size_t id, int hp, int attackDamage,
+    int specialDamage, int intimidate): damager(name, id, hp, attackDamage, specialDamage),
     m_intimidate(intimidate) {}
 
 void warrior::doSpecialAttack(entity& target) 
@@ -24,9 +24,8 @@ void warrior::doSpecialAttack(entity& target)
 void warrior::print() const {
     std::cout << "[Warrior] ID: " << m_id 
               << " | Name: " << m_name 
-              << " | HP: " << m_hp 
-              << " | Speed: " << m_speed 
+              << " | HP: " << m_hp  
               << " | Attack Damage: " << m_attackDamage 
-              << " | Special: Intimidate (Medium Success Rate)\n";
+              << " | Special: Intimidate (Medium Success Rate)\n"
               << " | Basic front line attacker. Can attempt to intimidate foes to stun them for one turn \n";
 }

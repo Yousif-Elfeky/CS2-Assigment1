@@ -1,8 +1,8 @@
 #include "damager.hpp"
 #include <iostream>
 
-damager::damager(const std::string& name, size_t id, int hp, int speed, int attackDamage, int specialDamage)
-    : entity(name, id, hp, speed), m_attackDamage(attackDamage), m_specialDamage(specialDamage) {}
+damager::damager(const std::string& name, size_t id, int hp, int attackDamage, int specialDamage)
+    : entity(name, id, hp), m_attackDamage(attackDamage), m_specialDamage(specialDamage) {}
 
 damager::~damager() {}
 

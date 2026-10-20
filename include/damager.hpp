@@ -7,9 +7,9 @@ protected:
     int m_specialDamage;
 
 public:
-    damager(const std::string& name, size_t id, int hp, int speed, int attackDamage,int specialDamage);
+    damager(const std::string& name, size_t id, int hp, int attackDamage,int specialDamage);
     virtual ~damager();
 
-    virtual void doNormalAttack(entity&) = 0;
+    virtual void doNormalAttack(entity&);
     virtual void doSpecialAttack(entity&) = 0;
 };
