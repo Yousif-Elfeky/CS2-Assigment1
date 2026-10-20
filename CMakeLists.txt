@@ -15,6 +15,7 @@ endif()
 add_library(app_lib
     src/entity.cpp
     src/healer.cpp
+    src/cleric.cpp
 )
 
 target_include_directories(app_lib
