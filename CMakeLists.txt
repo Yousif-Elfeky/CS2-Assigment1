@@ -18,6 +18,7 @@ add_library(app_lib
     src/cleric.cpp
     src/druid.cpp
     src/paladin.cpp
+    src/simulation.cpp
 )
 
 target_include_directories(app_lib
