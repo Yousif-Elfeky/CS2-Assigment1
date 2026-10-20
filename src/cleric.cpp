@@ -3,8 +3,9 @@
 #include <iostream>
 
 cleric::cleric(const std::string& name, size_t id, double hp,
-               double healPower, double mana)
-    : healer(name, id, hp, healPower, mana) {}
+               double healPower, double mana, faction team,
+               size_t maxActionPoints)
+    : healer(name, id, hp, healPower, mana, team, maxActionPoints) {}
 
 double cleric::healManaCost() const { return 20.0; }
 

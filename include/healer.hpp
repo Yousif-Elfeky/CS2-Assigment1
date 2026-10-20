@@ -18,10 +18,14 @@ class healer : public entity {
   virtual void applyHealing(entity&) = 0;
 
  public:
-  healer(const std::string&, size_t, double, double, double);
+  healer(const std::string&, size_t, double, double, double,
+         faction team = faction::player, size_t maxActionPoints = 2);
+
+  bool doNormalAction(entity&) override;
+  targetSide normalTargetSide() const override;
 
   // shared healing.
-  void heal(entity&);
+  bool heal(entity&);
 
   double getMana() const;
 };
