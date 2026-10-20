@@ -2,7 +2,6 @@
 
 #include <cstddef>
 #include <stdexcept>
-#include <utility>
 
 template <typename T>
 class stack {
@@ -31,12 +30,6 @@ class stack {
   }
 
   ~stack() { delete[] m_data; }
-
-  void push(const T& value) {
-    ensureCapacity(m_size + 1);
-    m_data[m_size] = value;
-    ++m_size;
-  }
 
   // l/rvalue
   void push(const T& value) {
