@@ -19,6 +19,8 @@ add_library(app_lib
     src/druid.cpp
     src/paladin.cpp
     src/simulation.cpp
+    src/humanController.cpp
+    src/aiController.cpp
 )
 
 target_include_directories(app_lib
