@@ -18,7 +18,7 @@ class healer : public entity {
   virtual void applyHealing(entity&) = 0;
 
  public:
-  healer(const std::string&, size_t, double, team, double, double);
+  healer(const std::string&, double, team, double, double);
 
   // shared healing.
   void heal(entity&);

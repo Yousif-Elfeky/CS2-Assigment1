@@ -7,8 +7,8 @@ class damager : public entity {
   int m_specialDamage;
 
  public:
-  damager(const std::string& name, size_t id, double hp, team team,
-          int attackDamage, int specialDamage);
+  damager(const std::string& name, double hp, team team, int attackDamage,
+          int specialDamage);
   virtual ~damager();
 
   bool doNormalAction(entity& target) override;

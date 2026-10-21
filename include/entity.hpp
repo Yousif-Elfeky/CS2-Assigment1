@@ -12,9 +12,10 @@ class entity {
   double m_maxHP;
   team m_team;
   targetType m_target;
+  static size_t s_nextID;
 
  public:
-  entity(const std::string&, size_t, double, team);
+  entity(const std::string&, double, team);
 
   // vitual destructor
   virtual ~entity();

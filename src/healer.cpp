@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-healer::healer(const std::string& name, size_t id, double hp, team team,
-               double healPower, double mana)
-    : entity(name, id, hp, team), m_healPower(healPower), m_mana(mana) {
+healer::healer(const std::string& name, double hp, team team, double healPower,
+               double mana)
+    : entity(name, hp, team), m_healPower(healPower), m_mana(mana) {
   m_target = targetType::ally;
 }
 

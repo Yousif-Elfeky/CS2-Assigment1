@@ -3,9 +3,9 @@
 #include <cstdlib>
 #include <iostream>
 
-warrior::warrior(const std::string& name, size_t id, double hp, team team,
+warrior::warrior(const std::string& name, double hp, team team,
                  int attackDamage, int specialDamage, int intimidate)
-    : damager(name, id, hp, team, attackDamage, specialDamage),
+    : damager(name, hp, team, attackDamage, specialDamage),
       m_intimidate(intimidate) {}
 
 void warrior::doSpecialAttack(entity& target) {

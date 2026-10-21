@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-damager::damager(const std::string& name, size_t id, double hp, team team,
+damager::damager(const std::string& name, double hp, team team,
                  int attackDamage, int specialDamage)
-    : entity(name, id, hp, team),
+    : entity(name, hp, team),
       m_attackDamage(attackDamage),
       m_specialDamage(specialDamage) {
   m_target = targetType::enemy;

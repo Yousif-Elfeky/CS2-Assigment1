@@ -1,7 +1,9 @@
 #include "entity.hpp"
 
-entity::entity(const std::string& name, size_t id, double hp, team team)
-    : m_name(name), m_id(id), m_hp(hp), m_maxHP(hp), m_team(team) {}
+size_t entity::s_nextID = 1;
+
+entity::entity(const std::string& name, double hp, team team)
+    : m_name(name), m_id(s_nextID++), m_hp(hp), m_maxHP(hp), m_team(team) {}
 
 entity::~entity() {}
 

@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-cleric::cleric(const std::string& name, size_t id, double hp, team team,
-               double healPower, double mana)
-    : healer(name, id, hp, team, healPower, mana) {}
+cleric::cleric(const std::string& name, double hp, team team, double healPower,
+               double mana)
+    : healer(name, hp, team, healPower, mana) {}
 
 double cleric::healManaCost() const { return 20.0; }
 

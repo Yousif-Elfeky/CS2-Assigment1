@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-druid::druid(const std::string& name, size_t id, double hp, team team,
-             double healPower, double mana)
-    : healer(name, id, hp, team, healPower, mana) {}
+druid::druid(const std::string& name, double hp, team team, double healPower,
+             double mana)
+    : healer(name, hp, team, healPower, mana) {}
 
 double druid::healManaCost() const { return 15.0; }
 

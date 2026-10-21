@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-paladin::paladin(const std::string& name, size_t id, double hp, team team,
+paladin::paladin(const std::string& name, double hp, team team,
                  double healPower, double mana)
-    : healer(name, id, hp, team, healPower, mana) {}
+    : healer(name, hp, team, healPower, mana) {}
 
 double paladin::healManaCost() const { return 25.0; }
 
