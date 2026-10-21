@@ -12,19 +12,19 @@ damager::damager(const std::string& name, double hp, team team,
 
 damager::~damager() {}
 
-void damager::doNormalAttack(entity& target) {
-  std::cout << m_name << " attacks " << target.getName() << " for "
+void damager::doNormalAttack(entity* target) {
+  std::cout << m_name << " attacks " << target->getName() << " for "
             << m_attackDamage << " damage\n";
-  target.takeDamage(m_attackDamage);
-  std::cout << target.getName() << "'s health is now " << target.getHP()
+  target->takeDamage(m_attackDamage);
+  std::cout << target->getName() << "'s health is now " << target->getHP()
             << "\n";
 
-  if (!target.isAlive()) {
-    std::cout << target.getName() << " has been slain!\n";
+  if (!target->isAlive()) {
+    std::cout << target->getName() << " has been slain!\n";
   }
 }
-bool damager::doNormalAction(entity& target) {
-  if (target.isEnemy()) {
+bool damager::doNormalAction(entity* target) {
+  if (target && target->isEnemy()) {
     doNormalAttack(target);
     return true;
   } else {

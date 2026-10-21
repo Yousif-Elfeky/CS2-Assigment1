@@ -23,7 +23,7 @@ class entity {
   // main methods that need to be overrided by child classes
   virtual void print() const = 0;
   //// returns true if the action was successful, false otherwise
-  virtual bool doNormalAction(entity& target) = 0;
+  virtual bool doNormalAction(entity* target) = 0;
 
   // core methods that are shared (don't need overrideding)
   const std::string& getName() const;

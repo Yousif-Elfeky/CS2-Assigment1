@@ -15,15 +15,15 @@ class healer : public entity {
 
   virtual double healManaCost() const = 0;
   virtual const char* healName() const = 0;
-  virtual void applyHealing(entity&) = 0;
+  virtual void applyHealing(entity* target) = 0;
 
  public:
   healer(const std::string&, double, team, double, double);
 
   // shared healing.
-  void heal(entity&);
+  void heal(entity* target);
 
-  bool doNormalAction(entity& target) override;
+  bool doNormalAction(entity* target) override;
 
   double getMana() const;
 };

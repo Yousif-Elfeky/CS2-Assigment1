@@ -9,7 +9,7 @@ class cleric : public healer {
  protected:
   double healManaCost() const override;
   const char* healName() const override;
-  void applyHealing(entity&) override;
+  void applyHealing(entity* target) override;
 
  public:
   cleric(const std::string& name, double hp = 90.0, team team = team::player,
