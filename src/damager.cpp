@@ -24,11 +24,14 @@ void damager::doNormalAttack(entity* target) {
   }
 }
 bool damager::doNormalAction(entity* target) {
-  if (target && target->isEnemy()) {
-    doNormalAttack(target);
-    return true;
-  } else {
+  if (!isAlive() || !target || !target->isAlive()) {
+    return false;
+  }
+
+  if (target->getTeam() == getTeam()) {
     std::cout << "Cannot attack an ally!\n";
     return false;
   }
+  doNormalAttack(target);
+  return true;
 }
