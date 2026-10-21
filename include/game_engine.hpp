@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <random>
 #include <vector>
 
 #include "entity.hpp"
@@ -19,9 +18,6 @@ class GameEngine {
   queue<size_t> m_turnQueue;
   // current round
   int m_round = 1;
-
-  // random number generator for the game engine
-  static std::mt19937 rng;
 
  private:
   bool readChoice(const std::string& prompt, int min, int max,

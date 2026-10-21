@@ -2,12 +2,8 @@
 
 #include <algorithm>
 #include <iostream>
-#include <limits>
-#include <random>
 #include <sstream>
 #include <string>
-
-std::mt19937 GameEngine::rng(std::random_device{}());
 
 void GameEngine::addEntity(std::unique_ptr<entity> entity) {
   if (entity) {
