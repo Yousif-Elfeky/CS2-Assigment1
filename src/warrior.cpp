@@ -3,24 +3,24 @@
 #include <cstdlib>
 #include <iostream>
 
-warrior::warrior(const std::string& name, size_t id, double hp,
+warrior::warrior(const std::string& name, double hp, team team,
                  int attackDamage, int specialDamage, int intimidate)
-    : damager(name, id, hp, attackDamage, specialDamage),
+    : damager(name, hp, team, attackDamage, specialDamage),
       m_intimidate(intimidate) {}
 
-void warrior::doSpecialAttack(entity& target) {
-  std::cout << m_name << " attempts to intimidate " << target.getName()
+void warrior::doSpecialAttack(entity* target) {
+  std::cout << m_name << " attempts to intimidate " << target->getName()
             << "...";
 
   int roll = std::rand() % 2;
 
   if (roll == 1 && m_intimidate > 0) {
-    std::cout << target.getName()
+    std::cout << target->getName()
               << " is successfully intimidated and skips their turn!\n";
     // Make enemy skip turn (Set their damage=0 for one turn turn only?)
-    // target.attackDamage = 0;
+    // target->attackDamage = 0;
   } else {
-    std::cout << target.getName() << " ignores " << m_name
+    std::cout << target->getName() << " ignores " << m_name
               << "'s intimidation attempt\n";
   }
 }

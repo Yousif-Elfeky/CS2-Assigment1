@@ -1,7 +1,9 @@
 #include "entity.hpp"
 
-entity::entity(const std::string& name, size_t id, double hp)
-    : m_name(name), m_id(id), m_hp(hp), m_maxHP(hp) {}
+size_t entity::s_nextID = 1;
+
+entity::entity(const std::string& name, double hp, team team)
+    : m_name(name), m_id(s_nextID++), m_hp(hp), m_maxHP(hp), m_team(team) {}
 
 entity::~entity() {}
 
@@ -12,6 +14,24 @@ double entity::getHP() const { return m_hp; }
 double entity::getMaxHP() const { return m_maxHP; }
 
 size_t entity::getID() const { return m_id; }
+
+team entity::getTeam() const { return m_team; }
+
+targetType entity::getTarget() const { return m_target; }
+
+bool entity::isAlly() const {
+  if (m_team == team::player) {
+    return true;
+  }
+  return false;
+}
+
+bool entity::isEnemy() const {
+  if (m_team == team::environment) {
+    return true;
+  }
+  return false;
+}
 
 bool entity::isAlive() const {
   if (m_hp > 0) return true;

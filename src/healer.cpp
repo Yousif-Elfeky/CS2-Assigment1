@@ -2,9 +2,11 @@
 
 #include <iostream>
 
-healer::healer(const std::string& name, size_t id, double hp,
-               double healPower, double mana)
-    : entity(name, id, hp), m_healPower(healPower), m_mana(mana) {}
+healer::healer(const std::string& name, double hp, team team, double healPower,
+               double mana)
+    : entity(name, hp, team), m_healPower(healPower), m_mana(mana) {
+  m_target = targetType::ally;
+}
 
 bool healer::spendMana(double cost) {
   if (m_mana < cost) return false;
@@ -12,17 +14,17 @@ bool healer::spendMana(double cost) {
   return true;
 }
 
-void healer::heal(entity& target) {
+void healer::heal(entity* target) {
   if (!isAlive()) {
     std::cout << m_name << " is down and cannot heal.\n";
     return;
   }
-  if (!target.isAlive()) {
-    std::cout << target.getName() << " is already defeated.\n";
+  if (!target || !target->isAlive()) {
+    std::cout << target->getName() << " is already defeated.\n";
     return;
   }
-  if (target.getHP() >= target.getMaxHP()) {
-    std::cout << target.getName() << " is already at full health.\n";
+  if (target->getHP() >= target->getMaxHP()) {
+    std::cout << target->getName() << " is already at full health.\n";
     return;
   }
 
@@ -37,3 +39,17 @@ void healer::heal(entity& target) {
 }
 
 double healer::getMana() const { return m_mana; }
+
+bool healer::doNormalAction(entity* target) {
+  if (!isAlive() || !target || !target->isAlive()) {
+    return false;
+  }
+
+  if (target->getTeam() != getTeam()) {
+    std::cout << "Cannot heal an enemy!\n";
+    return false;
+  }
+
+  heal(target);
+  return true;
+}

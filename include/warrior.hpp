@@ -6,9 +6,9 @@ class warrior : public damager {
   int m_intimidate;
 
  public:
-  warrior(const std::string& name, size_t id, double hp, int attackDamage,
+  warrior(const std::string& name, double hp, team team, int attackDamage,
           int specialDamage, int intimidate);
 
-  void doSpecialAttack(entity& target) override;
+  void doSpecialAttack(entity* target) override;
   void print() const override;
 };

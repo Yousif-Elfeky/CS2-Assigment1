@@ -7,10 +7,12 @@ class damager : public entity {
   int m_specialDamage;
 
  public:
-  damager(const std::string& name, size_t id, double hp, int attackDamage,
+  damager(const std::string& name, double hp, team team, int attackDamage,
           int specialDamage);
   virtual ~damager();
 
-  virtual void doNormalAttack(entity&);
-  virtual void doSpecialAttack(entity&) = 0;
+  bool doNormalAction(entity* target) override;
+
+  virtual void doNormalAttack(entity* target);
+  virtual void doSpecialAttack(entity*) = 0;
 };
