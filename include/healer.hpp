@@ -23,5 +23,7 @@ class healer : public entity {
   // shared healing.
   void heal(entity&);
 
+  bool doNormalAction(entity& target) override;
+
   double getMana() const;
 };

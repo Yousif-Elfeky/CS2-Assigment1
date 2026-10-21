@@ -23,3 +23,12 @@ void damager::doNormalAttack(entity& target) {
     std::cout << target.getName() << " has been slain!\n";
   }
 }
+bool damager::doNormalAction(entity& target) {
+  if (target.isEnemy()) {
+    doNormalAttack(target);
+    return true;
+  } else {
+    std::cout << "Cannot attack an ally!\n";
+    return false;
+  }
+}

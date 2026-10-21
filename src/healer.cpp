@@ -39,3 +39,13 @@ void healer::heal(entity& target) {
 }
 
 double healer::getMana() const { return m_mana; }
+
+bool healer::doNormalAction(entity& target) {
+  if (target.isAlly()) {
+    heal(target);
+    return true;
+  } else {
+    std::cout << "Cannot heal an enemy!\n";
+    return false;
+  }
+}
