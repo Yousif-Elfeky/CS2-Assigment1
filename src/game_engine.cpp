@@ -217,10 +217,13 @@ void GameEngine::environmentTurn(entity* currentEntity) {
   // healer logic: heal the ally with the lowest HP
   if (currentEntity->getTarget() == targetType::ally) {
     const entity* lowestHPAlly = nullptr;
-    for (const auto& ally : candidates) {
-      if (!lowestHPAlly || ally->getHP() < lowestHPAlly->getHP()) {
-        lowestHPAlly = ally;
-      }
+    auto lowestHPAllyIt =
+        std::min_element(candidates.begin(), candidates.end(),
+                         [](const entity* a, const entity* b) {
+                           return a->getHP() < b->getHP();
+                         });
+    if (lowestHPAllyIt != candidates.end()) {
+      lowestHPAlly = *lowestHPAllyIt;
     }
     if (lowestHPAlly) {
       currentEntity->doNormalAction(getEntity(lowestHPAlly->getID()));
@@ -228,10 +231,13 @@ void GameEngine::environmentTurn(entity* currentEntity) {
   } else if (currentEntity->getTarget() == targetType::enemy) {
     // damager logic: attack the enemy with the lowest HP
     const entity* lowestHPEnemy = nullptr;
-    for (const auto& enemy : candidates) {
-      if (!lowestHPEnemy || enemy->getHP() < lowestHPEnemy->getHP()) {
-        lowestHPEnemy = enemy;
-      }
+    auto lowestHPEnemyIt =
+        std::min_element(candidates.begin(), candidates.end(),
+                         [](const entity* a, const entity* b) {
+                           return a->getHP() < b->getHP();
+                         });
+    if (lowestHPEnemyIt != candidates.end()) {
+      lowestHPEnemy = *lowestHPEnemyIt;
     }
     if (lowestHPEnemy) {
       currentEntity->doNormalAction(getEntity(lowestHPEnemy->getID()));
