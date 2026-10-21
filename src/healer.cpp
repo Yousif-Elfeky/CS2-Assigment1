@@ -2,9 +2,11 @@
 
 #include <iostream>
 
-healer::healer(const std::string& name, size_t id, double hp,
+healer::healer(const std::string& name, size_t id, double hp, team team,
                double healPower, double mana)
-    : entity(name, id, hp), m_healPower(healPower), m_mana(mana) {}
+    : entity(name, id, hp, team), m_healPower(healPower), m_mana(mana) {
+  m_target = targetType::ally;
+}
 
 bool healer::spendMana(double cost) {
   if (m_mana < cost) return false;

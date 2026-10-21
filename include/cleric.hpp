@@ -13,7 +13,8 @@ class cleric : public healer {
 
  public:
   cleric(const std::string& name, size_t id, double hp = 90.0,
-         double healPower = 25.0, double mana = 100.0);
+         team team = team::player, double healPower = 25.0,
+         double mana = 100.0);
 
   void print() const override;
 };

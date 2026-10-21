@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-druid::druid(const std::string& name, size_t id, double hp,
+druid::druid(const std::string& name, size_t id, double hp, team team,
              double healPower, double mana)
-    : healer(name, id, hp, healPower, mana) {}
+    : healer(name, id, hp, team, healPower, mana) {}
 
 double druid::healManaCost() const { return 15.0; }
 
@@ -28,6 +28,6 @@ void druid::applyHealing(entity& target) {
 
 void druid::print() const {
   std::cout << "[Druid] ID: " << m_id << " | Name: " << m_name
-            << " | HP: " << m_hp << "/" << m_maxHP
-            << " | Heal: " << m_healPower << " | Mana: " << m_mana << "\n";
+            << " | HP: " << m_hp << "/" << m_maxHP << " | Heal: " << m_healPower
+            << " | Mana: " << m_mana << "\n";
 }

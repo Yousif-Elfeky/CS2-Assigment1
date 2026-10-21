@@ -13,7 +13,8 @@ class paladin : public healer {
 
  public:
   paladin(const std::string& name, size_t id, double hp = 120.0,
-          double healPower = 15.0, double mana = 80.0);
+          team team = team::player, double healPower = 15.0,
+          double mana = 80.0);
 
   void print() const override;
 };

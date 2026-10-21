@@ -13,7 +13,7 @@ class druid : public healer {
 
  public:
   druid(const std::string& name, size_t id, double hp = 80.0,
-        double healPower = 18.0, double mana = 90.0);
+        team team = team::player, double healPower = 18.0, double mana = 90.0);
 
   void print() const override;
 };

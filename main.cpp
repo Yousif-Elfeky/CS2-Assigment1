@@ -1,14 +1,14 @@
 #include <iostream>
-#include "entity.hpp"
+
+#include "cleric.hpp"
 #include "damager.hpp"
+#include "druid.hpp"
+#include "entity.hpp"
+#include "healer.hpp"
+#include "paladin.hpp"
 #include "warrior.hpp"
 
-
-#include "entity.hpp"
-
-int main() { 
-    
-    warrior testWarrior("Test Warrior", 1, 100, 20, 10, 5);
-    
-    return 0; 
+int main() {
+  warrior testWarrior("Test Warrior", 1, 100, team::player, 20, 10, 5);
+  return 0;
 }

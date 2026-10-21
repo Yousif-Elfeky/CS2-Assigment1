@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-cleric::cleric(const std::string& name, size_t id, double hp,
+cleric::cleric(const std::string& name, size_t id, double hp, team team,
                double healPower, double mana)
-    : healer(name, id, hp, healPower, mana) {}
+    : healer(name, id, hp, team, healPower, mana) {}
 
 double cleric::healManaCost() const { return 20.0; }
 
@@ -22,6 +22,6 @@ void cleric::applyHealing(entity& target) {
 
 void cleric::print() const {
   std::cout << "[Cleric] ID: " << m_id << " | Name: " << m_name
-            << " | HP: " << m_hp << "/" << m_maxHP
-            << " | Heal: " << m_healPower << " | Mana: " << m_mana << "\n";
+            << " | HP: " << m_hp << "/" << m_maxHP << " | Heal: " << m_healPower
+            << " | Mana: " << m_mana << "\n";
 }

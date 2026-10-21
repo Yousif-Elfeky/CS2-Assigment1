@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-paladin::paladin(const std::string& name, size_t id, double hp,
+paladin::paladin(const std::string& name, size_t id, double hp, team team,
                  double healPower, double mana)
-    : healer(name, id, hp, healPower, mana) {}
+    : healer(name, id, hp, team, healPower, mana) {}
 
 double paladin::healManaCost() const { return 25.0; }
 
@@ -28,6 +28,6 @@ void paladin::applyHealing(entity& target) {
 
 void paladin::print() const {
   std::cout << "[Paladin] ID: " << m_id << " | Name: " << m_name
-            << " | HP: " << m_hp << "/" << m_maxHP
-            << " | Heal: " << m_healPower << " | Mana: " << m_mana << "\n";
+            << " | HP: " << m_hp << "/" << m_maxHP << " | Heal: " << m_healPower
+            << " | Mana: " << m_mana << "\n";
 }

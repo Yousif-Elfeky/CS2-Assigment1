@@ -2,11 +2,13 @@
 
 #include <iostream>
 
-damager::damager(const std::string& name, size_t id, double hp,
+damager::damager(const std::string& name, size_t id, double hp, team team,
                  int attackDamage, int specialDamage)
-    : entity(name, id, hp),
+    : entity(name, id, hp, team),
       m_attackDamage(attackDamage),
-      m_specialDamage(specialDamage) {}
+      m_specialDamage(specialDamage) {
+  m_target = targetType::enemy;
+}
 
 damager::~damager() {}
 
