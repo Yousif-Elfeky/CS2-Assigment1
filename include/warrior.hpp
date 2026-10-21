@@ -2,7 +2,7 @@
 #include "damager.hpp"
 
 class warrior : public damager {
- private:
+ protected:
   int m_intimidate;
 
  public:

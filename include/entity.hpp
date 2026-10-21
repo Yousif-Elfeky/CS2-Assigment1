@@ -35,6 +35,6 @@ class entity {
   bool isEnemy() const;
   team getTeam() const;
   targetType getTarget() const;
-  void takeDamage(double);
+  virtual void takeDamage(double);
   void receiveHealing(double);
 };
