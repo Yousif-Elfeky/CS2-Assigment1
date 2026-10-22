@@ -18,9 +18,5 @@ int main() {
   game.addEntity(std::make_unique<warrior>("Enemy Warrior", 200.0,
                                            team::environment, 30, 25, 1));
 
-  if (!game.run()) {
-    return 1;
-  }
-
-  return 0;
+  return game.run();
 }

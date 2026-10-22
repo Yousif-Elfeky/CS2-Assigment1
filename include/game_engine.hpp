@@ -34,7 +34,7 @@ class GameEngine {
   void doEndOfRound();
 
  public:
-  bool run();
+  int run();
 
   void addEntity(std::unique_ptr<entity> entity);
   void removeEntity(size_t id);
