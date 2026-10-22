@@ -44,12 +44,11 @@ std::vector<const entity*> GameEngine::getValidTargets(
 
   for (const auto& e : m_entities) {
     if (!e || !e->isAlive()) continue;
-    if (e.get() == currentEntity) continue;  // skip self?
 
     // check what team we are on
     bool isSameTeam = (e->getTeam() == currentEntity->getTeam());
 
-    // if the currentEntity is an ally, we can only target allies
+    // Ally-targeting entities may heal themselves or another ally.
     if (isSameTeam && preferredTarget == targetType::ally) {
       validTargets.push_back(e.get());
     }
