@@ -1,8 +1,7 @@
 #include <memory>
 
-#include "druid.hpp"
 #include "game_engine.hpp"
-#include "warrior.hpp"
+#include "units.hpp"
 
 int main() {
   GameEngine game;
