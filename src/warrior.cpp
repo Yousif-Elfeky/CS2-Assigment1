@@ -11,13 +11,11 @@ warrior::warrior(const std::string& name, double hp, team team,
 void warrior::doSpecialAttack(entity* target) {
   std::print("{} attempts to intimidate {}...", m_name, target->getName());
 
-  int roll = std::rand() % 2;
-
-  if (roll == 1 && m_intimidate > 0) {
-    std::println("{} is successfully intimidated and skips their turn!",
+  const bool successful = m_intimidate > 0 && std::rand() % 2 == 1;
+  if (successful) {
+    target->skipNextTurn();
+    std::println("{} is successfully intimidated and skips their next turn!",
                  target->getName());
-    // Make enemy skip turn (Set their damage=0 for one turn turn only?)
-    // target->attackDamage = 0;
   } else {
     std::println("{} ignores {}'s intimidation attempt", target->getName(),
                  m_name);

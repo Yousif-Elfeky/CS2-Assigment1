@@ -16,4 +16,5 @@ class druid : public healer {
         double healPower = 18.0, double mana = 90.0);
 
   void print() const override;
+  bool doSpecialAction(entity* target) override;
 };
