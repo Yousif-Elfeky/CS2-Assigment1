@@ -111,7 +111,7 @@ void GameEngine::doEndOfRound() {
   std::cout << "\n--- End of Round " << m_round << " ---\n";
   printEntities();
 }
-void GameEngine::run() {
+bool GameEngine::run() {
   std::cout << "Starting the game...\n";
   while (!isGameOver()) {
     std::cout << "\n--- Round " << m_round << " ---\n";
@@ -146,6 +146,7 @@ void GameEngine::run() {
   }
 
   displayGameResult();
+  return isGameOver();
 }
 
 // helper for reading user input with validation
