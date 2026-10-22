@@ -12,12 +12,9 @@ void GameEngine::addEntity(std::unique_ptr<entity> entity) {
   }
 }
 void GameEngine::removeEntity(size_t id) {
-  auto it = std::find_if(
-      m_entities.begin(), m_entities.end(),
-      [id](const std::unique_ptr<entity>& e) { return e->getID() == id; });
-  if (it != m_entities.end()) {
-    m_entities.erase(it);
-  }
+  std::erase_if(m_entities, [id](const std::unique_ptr<entity>& e) {
+    return e->getID() == id;
+  });
 }
 entity* GameEngine::getEntity(size_t id) {
   for (auto& e : m_entities) {
@@ -118,6 +115,11 @@ void GameEngine::displayGameResult() const {
   }
 }
 void GameEngine::doEndOfRound() {
+  for (const auto& e : m_entities) {
+    if (e && !e->isAlive()) {
+      removeEntity(e->getID());
+    }
+  }
   std::println();
   std::println("==================== End of Round {} ====================",
                m_round);
