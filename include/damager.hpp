@@ -1,6 +1,7 @@
 #pragma once
 #include "entity.hpp"
 
+// abstract base for all damage dealer entities, which can attack target and perform special attacks.
 class damager : public entity {
  protected:
   int m_attackDamage;

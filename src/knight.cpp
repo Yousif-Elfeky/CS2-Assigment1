@@ -38,6 +38,20 @@ void knight::takeDamage(double d) {
   entity::takeDamage(d);
 }
 
+bool knight::doSpecialAction(entity* target) 
+{
+  if (!isAlive() || !target || !target->isAlive() || target->getTeam() == getTeam()) {
+    return false;
+  }
+
+  if (!spendActionPoints(getMaxActionPoints())) {
+    std::cout << m_name << " does not have enough action points.\n";
+    return false;
+  }
+  doSpecialAttack(target);
+  return true;
+}
+
 void knight::print() const {
   std::cout << "[Knight] ID: " << m_id << " | Name: " << m_name
             << " | HP: " << m_hp << " | Attack Damage: " << m_attackDamage

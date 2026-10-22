@@ -24,9 +24,24 @@ void berserker::takeDamage(double d) {
   entity::takeDamage(bd);
 }
 
+bool berserker::doSpecialAction(entity* target) 
+{
+  if (!isAlive() || !target || !target->isAlive() || target->getTeam() == getTeam()) {
+    return false;
+  }
+
+  if (!spendActionPoints(getMaxActionPoints())) {
+    std::cout << m_name << " does not have enough action points.\n";
+    return false;
+  }
+
+  doSpecialAttack(target);
+  return true;
+}
+
 void berserker::print() const {
   std::cout << "[Berserker] ID: " << m_id << " | Name: " << m_name
-            << " | HP: " << m_hp << "/" << m_maxHp 
+            << " | HP: " << m_hp << "/" << m_maxHP 
             << " | Attack: " << m_attackDamage 
             << " | Special: May attack with Rage, dealing " << m_specialDamage << " + Missing HP)\n"
             << " | Aggressive, unarmored warrior whose rage attack becomes more powerful as it takes damage. Takes more damage by default\n";

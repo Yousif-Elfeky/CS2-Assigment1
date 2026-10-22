@@ -4,7 +4,7 @@
 #include <iostream>
 
 magician::magician(const std::string& name, double hp, team team, int attackDamage, int specialDamage)
-    : damager(name, hp, team, attackDamage, 0),m_specialDamage(specialDamage) {}
+    : damager(name, hp, team, attackDamage, specialDamage) {}
 
 void magician::doSpecialAttack(entity* target) {
   // Fireball
@@ -37,6 +37,35 @@ void magician::doMagicMissles(std::vector<std::unique_ptr<entity>>& allEnemies)
       }
     }
   }
+}
+
+bool magician::doSpecialAction(entity* target) 
+{
+  if (!isAlive() || !target || !target->isAlive() || target->getTeam() == getTeam()) {
+    return false;
+  }
+
+  if (!spendActionPoints(getMaxActionPoints())) {
+    std::cout << m_name << " does not have enough action points.\n";
+    return false;
+  }
+
+  doSpecialAttack(target);
+  return true;
+}
+
+bool magician::doMultiTargetSpecialAction(std::vector<std::unique_ptr<entity>>& allEntities) 
+{
+  if (!isAlive()) {
+    return false;
+  }
+
+  if (!spendActionPoints(getMaxActionPoints())) {
+    std::cout << m_name << " does not have enough action points.\n";
+    return false;
+  }
+  doMagicMissles(allEntities);
+  return true;
 }
 
 void magician::print() const {
