@@ -301,16 +301,27 @@ void GameEngine::environmentTurn(entity* currentEntity) {
   }
   // healer logic: heal the ally with the lowest HP
   if (currentEntity->getTarget() == targetType::ally) {
-    const entity* lowestHPAlly = nullptr;
-    auto lowestHPAllyIt =
-        std::min_element(candidates.begin(), candidates.end(),
+    std::vector<const entity*> injuredAllies;
+    std::copy_if(
+        candidates.begin(), candidates.end(),
+        std::back_inserter(injuredAllies),
+        [](const entity* candidate) {
+          return candidate->getHP() < candidate->getMaxHP();
+        });
+
+    if (injuredAllies.empty()) {
+      std::println("{} has no injured allies to heal.",
+                   currentEntity->getName());
+      return;
+    }
+
+    const auto lowestHPAllyIt =
+        std::min_element(injuredAllies.begin(), injuredAllies.end(),
                          [](const entity* a, const entity* b) {
                            return a->getHP() < b->getHP();
                          });
-    if (lowestHPAllyIt != candidates.end()) {
-      lowestHPAlly = *lowestHPAllyIt;
-    }
-    if (lowestHPAlly) {
+    if (lowestHPAllyIt != injuredAllies.end()) {
+      const entity* lowestHPAlly = *lowestHPAllyIt;
       entity* target = getEntity(lowestHPAlly->getID());
       if (currentEntity->getActionPoints() >= entity::getMaxActionPoints()) {
         currentEntity->doSpecialAction(target);
