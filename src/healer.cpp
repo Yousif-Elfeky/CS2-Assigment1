@@ -1,6 +1,6 @@
 #include "healer.hpp"
 
-#include <iostream>
+#include <print>
 
 healer::healer(const std::string& name, double hp, team team, double healPower,
                double mana)
@@ -16,22 +16,21 @@ bool healer::spendMana(double cost) {
 
 void healer::heal(entity* target) {
   if (!isAlive()) {
-    std::cout << m_name << " is down and cannot heal.\n";
+    std::println("{} is down and cannot heal.", m_name);
     return;
   }
   if (!target || !target->isAlive()) {
-    std::cout << target->getName() << " is already defeated.\n";
+    std::println("{} is already defeated.", target->getName());
     return;
   }
   if (target->getHP() >= target->getMaxHP()) {
-    std::cout << target->getName() << " is already at full health.\n";
+    std::println("{} is already at full health.", target->getName());
     return;
   }
 
   const double cost = healManaCost();
   if (!spendMana(cost)) {
-    std::cout << m_name << " does not have enough mana for " << healName()
-              << ".\n";
+    std::println("{} does not have enough mana for {}.", m_name, healName());
     return;
   }
 
@@ -46,7 +45,7 @@ bool healer::doNormalAction(entity* target) {
   }
 
   if (target->getTeam() != getTeam()) {
-    std::cout << "Cannot heal an enemy!\n";
+    std::println("Cannot heal an enemy!");
     return false;
   }
 

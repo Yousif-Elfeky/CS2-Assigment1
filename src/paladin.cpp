@@ -1,6 +1,6 @@
 #include "paladin.hpp"
 
-#include <iostream>
+#include <print>
 
 paladin::paladin(const std::string& name, double hp, team team,
                  double healPower, double mana)
@@ -21,13 +21,11 @@ void paladin::applyHealing(entity* target) {
   const double targetHealed = target->getHP() - targetBefore;
   const double selfHealed = getHP() - selfBefore;
 
-  std::cout << m_name << " uses " << healName() << " on " << target->getName()
-            << " (+" << targetHealed << " HP) and gains " << selfHealed
-            << " HP.\n";
+  std::println("{} uses {} on {} (+{} HP) and gains {} HP.", m_name,
+               healName(), target->getName(), targetHealed, selfHealed);
 }
 
 void paladin::print() const {
-  std::cout << "[Paladin] ID: " << m_id << " | Name: " << m_name
-            << " | HP: " << m_hp << "/" << m_maxHP << " | Heal: " << m_healPower
-            << " | Mana: " << m_mana << "\n";
+  std::println("[Paladin] ID: {} | Name: {} | HP: {}/{} | Heal: {} | Mana: {}",
+               m_id, m_name, m_hp, m_maxHP, m_healPower, m_mana);
 }

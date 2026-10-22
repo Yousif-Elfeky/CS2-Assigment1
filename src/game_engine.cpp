@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <print>
 #include <sstream>
 #include <string>
 
@@ -87,34 +88,46 @@ bool GameEngine::isGameOver() const {
   return !hasPlayer() || !hasEnvironment();
 }
 void GameEngine::printEntities() const {
-  std::cout << "\n--- Entities ---\n";
+  std::println();
+  std::println("  ID   {:<24}{:<16}{:<14}Status", "Name", "Team", "Health");
+  std::println(
+      "  ---------------------------------------------------------------");
 
   for (const auto& e : m_entities) {
     if (!e) continue;
 
-    e->print();
-    std::cout << '\n';
+    const char* teamName =
+        e->getTeam() == team::player ? "Player" : "Environment";
+    const char* status = e->isAlive() ? "Active" : "Defeated";
+
+    std::println("  {:>3}   {:<24}{:<16}{:>5.1f} / {:<5.1f}  {}", e->getID(),
+                 e->getName(), teamName, e->getHP(), e->getMaxHP(), status);
   }
+
+  std::println();
 }
 void GameEngine::displayGameResult() const {
   bool playerAlive = hasPlayer();
   bool environmentAlive = hasEnvironment();
   if (playerAlive && !environmentAlive) {
-    std::cout << "Players win!\n";
+    std::println("Players win!");
   } else if (!playerAlive && environmentAlive) {
-    std::cout << "Environment wins!\n";
+    std::println("Environment wins!");
   } else {
-    std::cout << "It's a draw!\n";
+    std::println("It's a draw!");
   }
 }
 void GameEngine::doEndOfRound() {
-  std::cout << "\n--- End of Round " << m_round << " ---\n";
+  std::println();
+  std::println("==================== End of Round {} ====================",
+               m_round);
   printEntities();
 }
 int GameEngine::run() {
-  std::cout << "Starting the game...\n";
+  std::println("\n==================== Game Start ====================");
   while (!isGameOver()) {
-    std::cout << "\n--- Round " << m_round << " ---\n";
+    std::println("\n==================== Round {} ====================",
+                 m_round);
     prepareRound();
 
     while (!m_turnQueue.empty()) {
@@ -124,21 +137,24 @@ int GameEngine::run() {
       entity* currentEntity = getEntity(currentID);
       if (!currentEntity || !currentEntity->isAlive()) continue;
 
-      std::cout << "\nIt's " << currentEntity->getName() << "'s turn.\n";
+      std::println("\n--- {}'s turn ---", currentEntity->getName());
 
       auto validTargets = getValidTargets(currentEntity);
       if (validTargets.empty()) {
-        std::cout << currentEntity->getName()
-                  << " has no valid targets to act upon.\n";
+        std::println("{} has no valid targets to act upon.",
+                     currentEntity->getName());
         continue;
       }
       if (currentEntity->getTeam() == team::player) {
+        std::println();
         if (!playerTurn(currentEntity)) {
-          std::cout << currentEntity->getName() << "'s turn was skipped.\n";
+          std::println("{}'s turn was skipped.", currentEntity->getName());
         }
       } else {
+        std::println();
         environmentTurn(currentEntity);
       }
+      std::println();
     }
 
     if (!isGameOver()) doEndOfRound();
@@ -153,13 +169,13 @@ int GameEngine::run() {
 bool GameEngine::readChoice(const std::string& prompt, int min, int max,
                             int& choice) const {
   std::string line;
-  while (std::cout << prompt && std::getline(std::cin, line)) {
+  while (std::print("{}", prompt), std::getline(std::cin, line)) {
     std::istringstream ss(line);
 
     if (!(ss >> choice)) {
-      std::cout << "Invalid input. Enter a number.\n";
+      std::println("Invalid input. Enter a number.");
     } else if (choice < min || choice > max) {
-      std::cout << "Choose a number between " << min << " and " << max << ".\n";
+      std::println("Choose a number between {} and {}.", min, max);
     } else {
       return true;
     }
@@ -169,13 +185,13 @@ bool GameEngine::readChoice(const std::string& prompt, int min, int max,
 entity* GameEngine::selectTarget(const std::vector<const entity*>& candidates) {
   if (candidates.empty()) return nullptr;
 
-  std::cout << "\nChoose a target:\n";
+  std::println("\nChoose a target:");
 
   for (std::size_t i = 0; i < candidates.size(); ++i) {
     const entity* e = candidates[i];
 
-    std::cout << i + 1 << ". " << e->getName() << " (ID: " << e->getID()
-              << ", HP: " << e->getHP() << "/" << e->getMaxHP() << ")\n";
+    std::println("{}. {} (ID: {}, HP: {}/{})", i + 1, e->getName(), e->getID(),
+                 e->getHP(), e->getMaxHP());
   }
 
   int choice;
@@ -185,7 +201,7 @@ entity* GameEngine::selectTarget(const std::vector<const entity*>& candidates) {
 
   entity* selectedTarget = getEntity(candidates[choice - 1]->getID());
   if (!selectedTarget) {
-    std::cout << "Failed to select a target.\n";
+    std::println("Failed to select a target.");
     return nullptr;
   }
 
@@ -195,16 +211,16 @@ bool GameEngine::playerTurn(entity* currentEntity) {
   auto candidates = getValidTargets(currentEntity);
 
   if (candidates.empty()) {
-    std::cout << currentEntity->getName() << " has no valid targets.\n";
+    std::println("{} has no valid targets.", currentEntity->getName());
     return true;
   }
   entity* target = selectTarget(candidates);
   if (!target) {
-    std::cout << "No target selected. Skipping turn.\n";
+    std::println("No target selected. Skipping turn.");
     return true;
   }
   if (!currentEntity->doNormalAction(target)) {
-    std::cout << "Action failed.\n";
+    std::println("Action failed.");
   }
   return true;
 }
@@ -212,7 +228,7 @@ void GameEngine::environmentTurn(entity* currentEntity) {
   auto candidates = getValidTargets(currentEntity);
 
   if (candidates.empty()) {
-    std::cout << currentEntity->getName() << " has no valid targets.\n";
+    std::println("{} has no valid targets.", currentEntity->getName());
     return;
   }
   // healer logic: heal the ally with the lowest HP
