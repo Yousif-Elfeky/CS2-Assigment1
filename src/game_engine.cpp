@@ -89,7 +89,7 @@ void GameEngine::regenerateHealers() {
     if (!currentHealer || !currentHealer->isAlive()) continue;
 
     const double manaBefore = currentHealer->getMana();
-    currentHealer->regenMana(currentHealer->getMaxMana() / 2.0);
+    currentHealer->regenMana(currentHealer->getMaxMana() / 5.0);
     const double manaRestored = currentHealer->getMana() - manaBefore;
 
     std::println("{} regenerates {} mana ({}/{}).", currentHealer->getName(),
