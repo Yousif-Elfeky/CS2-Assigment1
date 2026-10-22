@@ -10,6 +10,8 @@ class entity {
   size_t m_id;
   double m_hp;
   double m_maxHP;
+  int m_actionPoints = 1;
+  bool m_skipNextTurn = false;
   team m_team;
   targetType m_target;
   static size_t s_nextID;
@@ -24,6 +26,7 @@ class entity {
   virtual void print() const = 0;
   //// returns true if the action was successful, false otherwise
   virtual bool doNormalAction(entity* target) = 0;
+  virtual bool doSpecialAction(entity* target) = 0;
 
   // core methods that are shared (don't need overrideding)
   const std::string& getName() const;
@@ -37,4 +40,10 @@ class entity {
   targetType getTarget() const;
   void takeDamage(double);
   void receiveHealing(double);
+  int getActionPoints() const;
+  static constexpr int getMaxActionPoints() { return 3; }
+  bool spendActionPoints(int amount);
+  void restoreActionPoints(int amount = 1);
+  void skipNextTurn();
+  bool shouldSkipTurn();
 };

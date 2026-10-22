@@ -102,8 +102,8 @@ bool GameEngine::isGameOver() const {
 }
 void GameEngine::printEntities() const {
   std::println();
-  std::println("  ID   {:<24}{:<16}{:<18}{:<14}Status", "Name", "Team",
-               "Health", "Mana");
+  std::println("  ID   {:<24}{:<16}{:<18}{:<14}{:<10}Status", "Name",
+               "Team", "Health", "Mana", "AP");
   std::println(
       "  "
       "------------------------------------------------------------------------"
@@ -120,15 +120,16 @@ void GameEngine::printEntities() const {
     if (currentHealer) {
       std::println(
           "  {:>3}   {:<24}{:<16}{:>5.1f} / {:<5.1f}  "
-          "{:>5.1f} / {:<5.1f}  {:>9}",
+          "{:>5.1f} / {:<5.1f}  {:>2} / {:<2}  {}",
           e->getID(), e->getName(), teamName, e->getHP(), e->getMaxHP(),
-          currentHealer->getMana(), currentHealer->getMaxMana(), status);
+          currentHealer->getMana(), currentHealer->getMaxMana(),
+          e->getActionPoints(), entity::getMaxActionPoints(), status);
     } else {
       std::println(
           "  {:>3}   {:<24}{:<16}{:>5.1f} / {:<5.1f}  "
-          "{:<18}{}",
+          "{:<18}{:>2} / {:<2}  {}",
           e->getID(), e->getName(), teamName, e->getHP(), e->getMaxHP(), "-",
-          status);
+          e->getActionPoints(), entity::getMaxActionPoints(), status);
     }
   }
 
@@ -175,6 +176,11 @@ int GameEngine::run() {
       if (!currentEntity || !currentEntity->isAlive()) continue;
 
       std::println("\n--- {}'s turn ---", currentEntity->getName());
+      if (currentEntity->shouldSkipTurn()) {
+        std::println("{} is intimidated and skips this turn.",
+                     currentEntity->getName());
+        continue;
+      }
 
       auto validTargets = getValidTargets(currentEntity);
       if (validTargets.empty()) {
@@ -263,10 +269,29 @@ bool GameEngine::playerTurn(entity* currentEntity) {
     std::println("No target selected. Skipping turn.");
     return true;
   }
-  if (!currentEntity->doNormalAction(target)) {
+
+  int actionChoice = 1;
+  if (currentEntity->getActionPoints() >= entity::getMaxActionPoints()) {
+    std::println("\n1. Normal action");
+    std::println("2. Special action ({} action points)",
+                 entity::getMaxActionPoints());
+    if (!readChoice("Action: ", 1, 2, actionChoice)) {
+      std::println("No action selected. Skipping turn.");
+      return false;
+    }
+  } else {
+    std::println("\nAction points: {}/{}. Special action unavailable.",
+                 currentEntity->getActionPoints(),
+                 entity::getMaxActionPoints());
+  }
+
+  const bool actionSucceeded =
+      actionChoice == 2 ? currentEntity->doSpecialAction(target)
+                        : currentEntity->doNormalAction(target);
+  if (!actionSucceeded) {
     std::println("Action failed.");
   }
-  return true;
+  return actionSucceeded;
 }
 void GameEngine::environmentTurn(entity* currentEntity) {
   auto candidates = getValidTargets(currentEntity);
@@ -287,7 +312,12 @@ void GameEngine::environmentTurn(entity* currentEntity) {
       lowestHPAlly = *lowestHPAllyIt;
     }
     if (lowestHPAlly) {
-      currentEntity->doNormalAction(getEntity(lowestHPAlly->getID()));
+      entity* target = getEntity(lowestHPAlly->getID());
+      if (currentEntity->getActionPoints() >= entity::getMaxActionPoints()) {
+        currentEntity->doSpecialAction(target);
+      } else {
+        currentEntity->doNormalAction(target);
+      }
     }
   } else if (currentEntity->getTarget() == targetType::enemy) {
     // damager logic: attack the enemy with the lowest HP
@@ -301,7 +331,12 @@ void GameEngine::environmentTurn(entity* currentEntity) {
       lowestHPEnemy = *lowestHPEnemyIt;
     }
     if (lowestHPEnemy) {
-      currentEntity->doNormalAction(getEntity(lowestHPEnemy->getID()));
+      entity* target = getEntity(lowestHPEnemy->getID());
+      if (currentEntity->getActionPoints() >= entity::getMaxActionPoints()) {
+        currentEntity->doSpecialAction(target);
+      } else {
+        currentEntity->doNormalAction(target);
+      }
     }
   }
 }

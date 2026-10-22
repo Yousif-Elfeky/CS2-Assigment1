@@ -24,6 +24,7 @@ class healer : public entity {
   void heal(entity* target);
 
   bool doNormalAction(entity* target) override;
+  virtual bool doSpecialAction(entity* target) override = 0;
 
   void regenMana(double amount);
 

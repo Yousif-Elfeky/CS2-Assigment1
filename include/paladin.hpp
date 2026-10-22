@@ -16,4 +16,5 @@ class paladin : public healer {
           double healPower = 15.0, double mana = 80.0);
 
   void print() const override;
+  bool doSpecialAction(entity* target) override;
 };
