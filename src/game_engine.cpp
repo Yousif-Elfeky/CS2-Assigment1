@@ -6,6 +6,8 @@
 #include <sstream>
 #include <string>
 
+#include "healer.hpp"
+
 void GameEngine::addEntity(std::unique_ptr<entity> entity) {
   if (entity) {
     m_entities.push_back(std::move(entity));
@@ -42,12 +44,11 @@ std::vector<const entity*> GameEngine::getValidTargets(
 
   for (const auto& e : m_entities) {
     if (!e || !e->isAlive()) continue;
-    if (e.get() == currentEntity) continue;  // skip self?
 
     // check what team we are on
     bool isSameTeam = (e->getTeam() == currentEntity->getTeam());
 
-    // if the currentEntity is an ally, we can only target allies
+    // Ally-targeting entities may heal themselves or another ally.
     if (isSameTeam && preferredTarget == targetType::ally) {
       validTargets.push_back(e.get());
     }
@@ -81,14 +82,31 @@ bool GameEngine::hasEnvironment() const {
   }
   return false;
 }
+void GameEngine::regenerateHealers() {
+  for (const auto& e : m_entities) {
+    auto* currentHealer = dynamic_cast<healer*>(e.get());
+    if (!currentHealer || !currentHealer->isAlive()) continue;
+
+    const double manaBefore = currentHealer->getMana();
+    currentHealer->regenMana(currentHealer->getMaxMana() / 5.0);
+    const double manaRestored = currentHealer->getMana() - manaBefore;
+
+    std::println("{} regenerates {} mana ({}/{}).", currentHealer->getName(),
+                 manaRestored, currentHealer->getMana(),
+                 currentHealer->getMaxMana());
+  }
+}
 bool GameEngine::isGameOver() const {
   return !hasPlayer() || !hasEnvironment();
 }
 void GameEngine::printEntities() const {
   std::println();
-  std::println("  ID   {:<24}{:<16}{:<14}Status", "Name", "Team", "Health");
+  std::println("  ID   {:<24}{:<16}{:<18}{:<14}{:<10}Status", "Name",
+               "Team", "Health", "Mana", "AP");
   std::println(
-      "  ---------------------------------------------------------------");
+      "  "
+      "------------------------------------------------------------------------"
+      "-----");
 
   for (const auto& e : m_entities) {
     if (!e) continue;
@@ -96,9 +114,22 @@ void GameEngine::printEntities() const {
     const char* teamName =
         e->getTeam() == team::player ? "Player" : "Environment";
     const char* status = e->isAlive() ? "Active" : "Defeated";
+    const auto* currentHealer = dynamic_cast<const healer*>(e.get());
 
-    std::println("  {:>3}   {:<24}{:<16}{:>5.1f} / {:<5.1f}  {}", e->getID(),
-                 e->getName(), teamName, e->getHP(), e->getMaxHP(), status);
+    if (currentHealer) {
+      std::println(
+          "  {:>3}   {:<24}{:<16}{:>5.1f} / {:<5.1f}  "
+          "{:>5.1f} / {:<5.1f}  {:>2} / {:<2}  {}",
+          e->getID(), e->getName(), teamName, e->getHP(), e->getMaxHP(),
+          currentHealer->getMana(), currentHealer->getMaxMana(),
+          e->getActionPoints(), entity::getMaxActionPoints(), status);
+    } else {
+      std::println(
+          "  {:>3}   {:<24}{:<16}{:>5.1f} / {:<5.1f}  "
+          "{:<18}{:>2} / {:<2}  {}",
+          e->getID(), e->getName(), teamName, e->getHP(), e->getMaxHP(), "-",
+          e->getActionPoints(), entity::getMaxActionPoints(), status);
+    }
   }
 
   std::println();
@@ -124,6 +155,10 @@ void GameEngine::doEndOfRound() {
   std::println("==================== End of Round {} ====================",
                m_round);
   printEntities();
+  if (m_round % 3 == 0) {
+    std::println("--- Mana Regeneration ---");
+    regenerateHealers();
+  }
 }
 int GameEngine::run() {
   std::println("\n==================== Game Start ====================");
@@ -140,6 +175,11 @@ int GameEngine::run() {
       if (!currentEntity || !currentEntity->isAlive()) continue;
 
       std::println("\n--- {}'s turn ---", currentEntity->getName());
+      if (currentEntity->shouldSkipTurn()) {
+        std::println("{} is intimidated and skips this turn.",
+                     currentEntity->getName());
+        continue;
+      }
 
       auto validTargets = getValidTargets(currentEntity);
       if (validTargets.empty()) {
@@ -192,8 +232,15 @@ entity* GameEngine::selectTarget(const std::vector<const entity*>& candidates) {
   for (std::size_t i = 0; i < candidates.size(); ++i) {
     const entity* e = candidates[i];
 
-    std::println("{}. {} (ID: {}, HP: {}/{})", i + 1, e->getName(), e->getID(),
-                 e->getHP(), e->getMaxHP());
+    const auto* currentHealer = dynamic_cast<const healer*>(e);
+    if (currentHealer) {
+      std::println("{}. {} (ID: {}, HP: {}/{}, Mana: {}/{})", i + 1,
+                   e->getName(), e->getID(), e->getHP(), e->getMaxHP(),
+                   currentHealer->getMana(), currentHealer->getMaxMana());
+    } else {
+      std::println("{}. {} (ID: {}, HP: {}/{})", i + 1, e->getName(),
+                   e->getID(), e->getHP(), e->getMaxHP());
+    }
   }
 
   int choice;
@@ -210,6 +257,22 @@ entity* GameEngine::selectTarget(const std::vector<const entity*>& candidates) {
   return selectedTarget;
 }
 bool GameEngine::playerTurn(entity* currentEntity) {
+  if (dynamic_cast<const healer*>(currentEntity)) {
+    std::println("\n1. Heal");
+    std::println("2. Skip turn and conserve mana");
+
+    int healerChoice = 1;
+    if (!readChoice("Action: ", 1, 2, healerChoice)) {
+      std::println("No action selected. Skipping turn.");
+      return false;
+    }
+    if (healerChoice == 2) {
+      std::println("{} skips the turn and conserves mana.",
+                   currentEntity->getName());
+      return true;
+    }
+  }
+
   auto candidates = getValidTargets(currentEntity);
 
   if (candidates.empty()) {
@@ -221,10 +284,29 @@ bool GameEngine::playerTurn(entity* currentEntity) {
     std::println("No target selected. Skipping turn.");
     return true;
   }
-  if (!currentEntity->doNormalAction(target)) {
+
+  int actionChoice = 1;
+  if (currentEntity->getActionPoints() >= entity::getMaxActionPoints()) {
+    std::println("\n1. Normal action");
+    std::println("2. Special action ({} action points)",
+                 entity::getMaxActionPoints());
+    if (!readChoice("Action: ", 1, 2, actionChoice)) {
+      std::println("No action selected. Skipping turn.");
+      return false;
+    }
+  } else {
+    std::println("\nAction points: {}/{}. Special action unavailable.",
+                 currentEntity->getActionPoints(),
+                 entity::getMaxActionPoints());
+  }
+
+  const bool actionSucceeded =
+      actionChoice == 2 ? currentEntity->doSpecialAction(target)
+                        : currentEntity->doNormalAction(target);
+  if (!actionSucceeded) {
     std::println("Action failed.");
   }
-  return true;
+  return actionSucceeded;
 }
 void GameEngine::environmentTurn(entity* currentEntity) {
   auto candidates = getValidTargets(currentEntity);
@@ -235,17 +317,33 @@ void GameEngine::environmentTurn(entity* currentEntity) {
   }
   // healer logic: heal the ally with the lowest HP
   if (currentEntity->getTarget() == targetType::ally) {
-    const entity* lowestHPAlly = nullptr;
-    auto lowestHPAllyIt =
-        std::min_element(candidates.begin(), candidates.end(),
+    std::vector<const entity*> injuredAllies;
+    std::copy_if(
+        candidates.begin(), candidates.end(),
+        std::back_inserter(injuredAllies),
+        [](const entity* candidate) {
+          return candidate->getHP() < candidate->getMaxHP();
+        });
+
+    if (injuredAllies.empty()) {
+      std::println("{} has no injured allies to heal.",
+                   currentEntity->getName());
+      return;
+    }
+
+    const auto lowestHPAllyIt =
+        std::min_element(injuredAllies.begin(), injuredAllies.end(),
                          [](const entity* a, const entity* b) {
                            return a->getHP() < b->getHP();
                          });
-    if (lowestHPAllyIt != candidates.end()) {
-      lowestHPAlly = *lowestHPAllyIt;
-    }
-    if (lowestHPAlly) {
-      currentEntity->doNormalAction(getEntity(lowestHPAlly->getID()));
+    if (lowestHPAllyIt != injuredAllies.end()) {
+      const entity* lowestHPAlly = *lowestHPAllyIt;
+      entity* target = getEntity(lowestHPAlly->getID());
+      if (currentEntity->getActionPoints() >= entity::getMaxActionPoints()) {
+        currentEntity->doSpecialAction(target);
+      } else {
+        currentEntity->doNormalAction(target);
+      }
     }
   } else if (currentEntity->getTarget() == targetType::enemy) {
     // damager logic: attack the enemy with the lowest HP
@@ -259,7 +357,12 @@ void GameEngine::environmentTurn(entity* currentEntity) {
       lowestHPEnemy = *lowestHPEnemyIt;
     }
     if (lowestHPEnemy) {
-      currentEntity->doNormalAction(getEntity(lowestHPEnemy->getID()));
+      entity* target = getEntity(lowestHPEnemy->getID());
+      if (currentEntity->getActionPoints() >= entity::getMaxActionPoints()) {
+        currentEntity->doSpecialAction(target);
+      } else {
+        currentEntity->doNormalAction(target);
+      }
     }
   }
 }

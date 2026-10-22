@@ -16,4 +16,5 @@ class cleric : public healer {
          double healPower = 25.0, double mana = 100.0);
 
   void print() const override;
+  bool doSpecialAction(entity* target) override;
 };

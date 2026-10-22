@@ -1,5 +1,7 @@
 #include "entity.hpp"
 
+#include <algorithm>
+
 size_t entity::s_nextID = 1;
 
 entity::entity(const std::string& name, double hp, team team)
@@ -39,8 +41,31 @@ bool entity::isAlive() const {
 }
 void entity::takeDamage(double d) {
   if (d <= 0) return;
+  restoreActionPoints();
   m_hp -= d;
   if (m_hp < 0) m_hp = 0;
+}
+
+int entity::getActionPoints() const { return m_actionPoints; }
+
+bool entity::spendActionPoints(int amount) {
+  if (amount < 0 || m_actionPoints < amount) return false;
+  m_actionPoints -= amount;
+  return true;
+}
+
+void entity::restoreActionPoints(int amount) {
+  if (amount <= 0) return;
+  m_actionPoints =
+      std::min(getMaxActionPoints(), m_actionPoints + amount);
+}
+
+void entity::skipNextTurn() { m_skipNextTurn = true; }
+
+bool entity::shouldSkipTurn() {
+  if (!m_skipNextTurn) return false;
+  m_skipNextTurn = false;
+  return true;
 }
 
 void entity::receiveHealing(double amount) {

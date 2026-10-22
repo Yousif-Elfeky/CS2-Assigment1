@@ -1,10 +1,14 @@
 #include "healer.hpp"
 
+#include <algorithm>
 #include <print>
 
 healer::healer(const std::string& name, double hp, team team, double healPower,
                double mana)
-    : entity(name, hp, team), m_healPower(healPower), m_mana(mana) {
+    : entity(name, hp, team),
+      m_healPower(healPower),
+      m_mana(mana),
+      m_maxMana(mana) {
   m_target = targetType::ally;
 }
 
@@ -12,6 +16,10 @@ bool healer::spendMana(double cost) {
   if (m_mana < cost) return false;
   m_mana -= cost;
   return true;
+}
+
+void healer::regenMana(double amount) {
+  m_mana = std::min(m_mana + amount, m_maxMana);
 }
 
 void healer::heal(entity* target) {
@@ -38,6 +46,8 @@ void healer::heal(entity* target) {
 }
 
 double healer::getMana() const { return m_mana; }
+
+double healer::getMaxMana() const { return m_maxMana; }
 
 bool healer::doNormalAction(entity* target) {
   if (!isAlive() || !target || !target->isAlive()) {
