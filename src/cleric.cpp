@@ -1,6 +1,6 @@
 #include "cleric.hpp"
 
-#include <iostream>
+#include <print>
 
 cleric::cleric(const std::string& name, double hp, team team, double healPower,
                double mana)
@@ -15,13 +15,28 @@ void cleric::applyHealing(entity* target) {
   target->receiveHealing(m_healPower);
   const double restored = target->getHP() - before;
 
-  std::cout << m_name << " uses " << healName() << " on " << target->getName()
-            << ", restoring " << restored << " HP (" << target->getHP()
-            << " HP total).\n";
+  std::println("{} uses {} on {}, restoring {} HP ({} HP total).", m_name,
+               healName(), target->getName(), restored, target->getHP());
 }
 
 void cleric::print() const {
-  std::cout << "[Cleric] ID: " << m_id << " | Name: " << m_name
-            << " | HP: " << m_hp << "/" << m_maxHP << " | Heal: " << m_healPower
-            << " | Mana: " << m_mana << "\n";
+  std::println("[Cleric] ID: {} | Name: {} | HP: {}/{} | Heal: {} | Mana: {}",
+               m_id, m_name, m_hp, m_maxHP, m_healPower, m_mana);
+}
+
+bool cleric::doSpecialAction(entity* target) {
+  if (!isAlive() || !target || !target->isAlive() ||
+      target->getTeam() != getTeam()) {
+    return false;
+  }
+  if (!spendActionPoints(getMaxActionPoints())) {
+    std::println("{} does not have enough action points.", m_name);
+    return false;
+  }
+
+  const double targetBefore = target->getHP();
+  target->receiveHealing(target->getMaxHP());
+  std::println("{} uses Divine Restoration on {} (+{} HP, full recovery).",
+               m_name, target->getName(), target->getHP() - targetBefore);
+  return true;
 }

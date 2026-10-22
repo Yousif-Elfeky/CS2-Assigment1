@@ -2,8 +2,11 @@
 
 #include <algorithm>
 #include <iostream>
+#include <print>
 #include <sstream>
 #include <string>
+
+#include "healer.hpp"
 
 void GameEngine::addEntity(std::unique_ptr<entity> entity) {
   if (entity) {
@@ -11,12 +14,9 @@ void GameEngine::addEntity(std::unique_ptr<entity> entity) {
   }
 }
 void GameEngine::removeEntity(size_t id) {
-  auto it = std::find_if(
-      m_entities.begin(), m_entities.end(),
-      [id](const std::unique_ptr<entity>& e) { return e->getID() == id; });
-  if (it != m_entities.end()) {
-    m_entities.erase(it);
-  }
+  std::erase_if(m_entities, [id](const std::unique_ptr<entity>& e) {
+    return e->getID() == id;
+  });
 }
 entity* GameEngine::getEntity(size_t id) {
   for (auto& e : m_entities) {
@@ -44,12 +44,11 @@ std::vector<const entity*> GameEngine::getValidTargets(
 
   for (const auto& e : m_entities) {
     if (!e || !e->isAlive()) continue;
-    if (e.get() == currentEntity) continue;  // skip self?
 
     // check what team we are on
     bool isSameTeam = (e->getTeam() == currentEntity->getTeam());
 
-    // if the currentEntity is an ally, we can only target allies
+    // Ally-targeting entities may heal themselves or another ally.
     if (isSameTeam && preferredTarget == targetType::ally) {
       validTargets.push_back(e.get());
     }
@@ -83,38 +82,89 @@ bool GameEngine::hasEnvironment() const {
   }
   return false;
 }
+void GameEngine::regenerateHealers() {
+  for (const auto& e : m_entities) {
+    auto* currentHealer = dynamic_cast<healer*>(e.get());
+    if (!currentHealer || !currentHealer->isAlive()) continue;
+
+    const double manaBefore = currentHealer->getMana();
+    currentHealer->regenMana(currentHealer->getMaxMana() / 5.0);
+    const double manaRestored = currentHealer->getMana() - manaBefore;
+
+    std::println("{} regenerates {} mana ({}/{}).", currentHealer->getName(),
+                 manaRestored, currentHealer->getMana(),
+                 currentHealer->getMaxMana());
+  }
+}
 bool GameEngine::isGameOver() const {
   return !hasPlayer() || !hasEnvironment();
 }
 void GameEngine::printEntities() const {
-  std::cout << "\n--- Entities ---\n";
+  std::println();
+  std::println("  ID   {:<24}{:<16}{:<18}{:<14}{:<10}Status", "Name",
+               "Team", "Health", "Mana", "AP");
+  std::println(
+      "  "
+      "------------------------------------------------------------------------"
+      "-----");
 
   for (const auto& e : m_entities) {
     if (!e) continue;
 
-    e->print();
-    std::cout << '\n';
+    const char* teamName =
+        e->getTeam() == team::player ? "Player" : "Environment";
+    const char* status = e->isAlive() ? "Active" : "Defeated";
+    const auto* currentHealer = dynamic_cast<const healer*>(e.get());
+
+    if (currentHealer) {
+      std::println(
+          "  {:>3}   {:<24}{:<16}{:>5.1f} / {:<5.1f}  "
+          "{:>5.1f} / {:<5.1f}  {:>2} / {:<2}  {}",
+          e->getID(), e->getName(), teamName, e->getHP(), e->getMaxHP(),
+          currentHealer->getMana(), currentHealer->getMaxMana(),
+          e->getActionPoints(), entity::getMaxActionPoints(), status);
+    } else {
+      std::println(
+          "  {:>3}   {:<24}{:<16}{:>5.1f} / {:<5.1f}  "
+          "{:<18}{:>2} / {:<2}  {}",
+          e->getID(), e->getName(), teamName, e->getHP(), e->getMaxHP(), "-",
+          e->getActionPoints(), entity::getMaxActionPoints(), status);
+    }
   }
+
+  std::println();
 }
 void GameEngine::displayGameResult() const {
   bool playerAlive = hasPlayer();
   bool environmentAlive = hasEnvironment();
   if (playerAlive && !environmentAlive) {
-    std::cout << "Players win!\n";
+    std::println("Players win!");
   } else if (!playerAlive && environmentAlive) {
-    std::cout << "Environment wins!\n";
+    std::println("Environment wins!");
   } else {
-    std::cout << "It's a draw!\n";
+    std::println("It's a draw!");
   }
 }
 void GameEngine::doEndOfRound() {
-  std::cout << "\n--- End of Round " << m_round << " ---\n";
+  for (const auto& e : m_entities) {
+    if (e && !e->isAlive()) {
+      removeEntity(e->getID());
+    }
+  }
+  std::println();
+  std::println("==================== End of Round {} ====================",
+               m_round);
   printEntities();
+  if (m_round % 3 == 0) {
+    std::println("--- Mana Regeneration ---");
+    regenerateHealers();
+  }
 }
-void GameEngine::run() {
-  std::cout << "Starting the game...\n";
+int GameEngine::run() {
+  std::println("\n==================== Game Start ====================");
   while (!isGameOver()) {
-    std::cout << "\n--- Round " << m_round << " ---\n";
+    std::println("\n==================== Round {} ====================",
+                 m_round);
     prepareRound();
 
     while (!m_turnQueue.empty()) {
@@ -124,21 +174,29 @@ void GameEngine::run() {
       entity* currentEntity = getEntity(currentID);
       if (!currentEntity || !currentEntity->isAlive()) continue;
 
-      std::cout << "\nIt's " << currentEntity->getName() << "'s turn.\n";
+      std::println("\n--- {}'s turn ---", currentEntity->getName());
+      if (currentEntity->shouldSkipTurn()) {
+        std::println("{} is intimidated and skips this turn.",
+                     currentEntity->getName());
+        continue;
+      }
 
       auto validTargets = getValidTargets(currentEntity);
       if (validTargets.empty()) {
-        std::cout << currentEntity->getName()
-                  << " has no valid targets to act upon.\n";
+        std::println("{} has no valid targets to act upon.",
+                     currentEntity->getName());
         continue;
       }
       if (currentEntity->getTeam() == team::player) {
+        std::println();
         if (!playerTurn(currentEntity)) {
-          std::cout << currentEntity->getName() << "'s turn was skipped.\n";
+          std::println("{}'s turn was skipped.", currentEntity->getName());
         }
       } else {
+        std::println();
         environmentTurn(currentEntity);
       }
+      std::println();
     }
 
     if (!isGameOver()) doEndOfRound();
@@ -146,19 +204,20 @@ void GameEngine::run() {
   }
 
   displayGameResult();
+  return isGameOver() ? 0 : 1;  // return 0 if game over, else 1
 }
 
 // helper for reading user input with validation
 bool GameEngine::readChoice(const std::string& prompt, int min, int max,
                             int& choice) const {
   std::string line;
-  while (std::cout << prompt && std::getline(std::cin, line)) {
+  while (std::print("{}", prompt), std::getline(std::cin, line)) {
     std::istringstream ss(line);
 
     if (!(ss >> choice)) {
-      std::cout << "Invalid input. Enter a number.\n";
+      std::println("Invalid input. Enter a number.");
     } else if (choice < min || choice > max) {
-      std::cout << "Choose a number between " << min << " and " << max << ".\n";
+      std::println("Choose a number between {} and {}.", min, max);
     } else {
       return true;
     }
@@ -168,13 +227,20 @@ bool GameEngine::readChoice(const std::string& prompt, int min, int max,
 entity* GameEngine::selectTarget(const std::vector<const entity*>& candidates) {
   if (candidates.empty()) return nullptr;
 
-  std::cout << "\nChoose a target:\n";
+  std::println("\nChoose a target:");
 
   for (std::size_t i = 0; i < candidates.size(); ++i) {
     const entity* e = candidates[i];
 
-    std::cout << i + 1 << ". " << e->getName() << " (ID: " << e->getID()
-              << ", HP: " << e->getHP() << "/" << e->getMaxHP() << ")\n";
+    const auto* currentHealer = dynamic_cast<const healer*>(e);
+    if (currentHealer) {
+      std::println("{}. {} (ID: {}, HP: {}/{}, Mana: {}/{})", i + 1,
+                   e->getName(), e->getID(), e->getHP(), e->getMaxHP(),
+                   currentHealer->getMana(), currentHealer->getMaxMana());
+    } else {
+      std::println("{}. {} (ID: {}, HP: {}/{})", i + 1, e->getName(),
+                   e->getID(), e->getHP(), e->getMaxHP());
+    }
   }
 
   int choice;
@@ -184,49 +250,100 @@ entity* GameEngine::selectTarget(const std::vector<const entity*>& candidates) {
 
   entity* selectedTarget = getEntity(candidates[choice - 1]->getID());
   if (!selectedTarget) {
-    std::cout << "Failed to select a target.\n";
+    std::println("Failed to select a target.");
     return nullptr;
   }
 
   return selectedTarget;
 }
 bool GameEngine::playerTurn(entity* currentEntity) {
+  if (dynamic_cast<const healer*>(currentEntity)) {
+    std::println("\n1. Heal");
+    std::println("2. Skip turn and conserve mana");
+
+    int healerChoice = 1;
+    if (!readChoice("Action: ", 1, 2, healerChoice)) {
+      std::println("No action selected. Skipping turn.");
+      return false;
+    }
+    if (healerChoice == 2) {
+      std::println("{} skips the turn and conserves mana.",
+                   currentEntity->getName());
+      return true;
+    }
+  }
+
   auto candidates = getValidTargets(currentEntity);
 
   if (candidates.empty()) {
-    std::cout << currentEntity->getName() << " has no valid targets.\n";
+    std::println("{} has no valid targets.", currentEntity->getName());
     return true;
   }
   entity* target = selectTarget(candidates);
   if (!target) {
-    std::cout << "No target selected. Skipping turn.\n";
+    std::println("No target selected. Skipping turn.");
     return true;
   }
-  if (!currentEntity->doNormalAction(target)) {
-    std::cout << "Action failed.\n";
+
+  int actionChoice = 1;
+  if (currentEntity->getActionPoints() >= entity::getMaxActionPoints()) {
+    std::println("\n1. Normal action");
+    std::println("2. Special action ({} action points)",
+                 entity::getMaxActionPoints());
+    if (!readChoice("Action: ", 1, 2, actionChoice)) {
+      std::println("No action selected. Skipping turn.");
+      return false;
+    }
+  } else {
+    std::println("\nAction points: {}/{}. Special action unavailable.",
+                 currentEntity->getActionPoints(),
+                 entity::getMaxActionPoints());
   }
-  return true;
+
+  const bool actionSucceeded =
+      actionChoice == 2 ? currentEntity->doSpecialAction(target)
+                        : currentEntity->doNormalAction(target);
+  if (!actionSucceeded) {
+    std::println("Action failed.");
+  }
+  return actionSucceeded;
 }
 void GameEngine::environmentTurn(entity* currentEntity) {
   auto candidates = getValidTargets(currentEntity);
 
   if (candidates.empty()) {
-    std::cout << currentEntity->getName() << " has no valid targets.\n";
+    std::println("{} has no valid targets.", currentEntity->getName());
     return;
   }
   // healer logic: heal the ally with the lowest HP
   if (currentEntity->getTarget() == targetType::ally) {
-    const entity* lowestHPAlly = nullptr;
-    auto lowestHPAllyIt =
-        std::min_element(candidates.begin(), candidates.end(),
+    std::vector<const entity*> injuredAllies;
+    std::copy_if(
+        candidates.begin(), candidates.end(),
+        std::back_inserter(injuredAllies),
+        [](const entity* candidate) {
+          return candidate->getHP() < candidate->getMaxHP();
+        });
+
+    if (injuredAllies.empty()) {
+      std::println("{} has no injured allies to heal.",
+                   currentEntity->getName());
+      return;
+    }
+
+    const auto lowestHPAllyIt =
+        std::min_element(injuredAllies.begin(), injuredAllies.end(),
                          [](const entity* a, const entity* b) {
                            return a->getHP() < b->getHP();
                          });
-    if (lowestHPAllyIt != candidates.end()) {
-      lowestHPAlly = *lowestHPAllyIt;
-    }
-    if (lowestHPAlly) {
-      currentEntity->doNormalAction(getEntity(lowestHPAlly->getID()));
+    if (lowestHPAllyIt != injuredAllies.end()) {
+      const entity* lowestHPAlly = *lowestHPAllyIt;
+      entity* target = getEntity(lowestHPAlly->getID());
+      if (currentEntity->getActionPoints() >= entity::getMaxActionPoints()) {
+        currentEntity->doSpecialAction(target);
+      } else {
+        currentEntity->doNormalAction(target);
+      }
     }
   } else if (currentEntity->getTarget() == targetType::enemy) {
     // damager logic: attack the enemy with the lowest HP
@@ -240,7 +357,12 @@ void GameEngine::environmentTurn(entity* currentEntity) {
       lowestHPEnemy = *lowestHPEnemyIt;
     }
     if (lowestHPEnemy) {
-      currentEntity->doNormalAction(getEntity(lowestHPEnemy->getID()));
+      entity* target = getEntity(lowestHPEnemy->getID());
+      if (currentEntity->getActionPoints() >= entity::getMaxActionPoints()) {
+        currentEntity->doSpecialAction(target);
+      } else {
+        currentEntity->doNormalAction(target);
+      }
     }
   }
 }

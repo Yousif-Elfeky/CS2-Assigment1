@@ -30,11 +30,12 @@ class GameEngine {
 
   bool hasPlayer() const;
   bool hasEnvironment() const;
+  void regenerateHealers();
   void prepareRound();
   void doEndOfRound();
 
  public:
-  void run();
+  int run();
 
   void addEntity(std::unique_ptr<entity> entity);
   void removeEntity(size_t id);

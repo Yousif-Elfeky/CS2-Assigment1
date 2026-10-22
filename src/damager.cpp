@@ -1,6 +1,6 @@
 #include "damager.hpp"
 
-#include <iostream>
+#include <print>
 
 damager::damager(const std::string& name, double hp, team team,
                  int attackDamage, int specialDamage)
@@ -13,14 +13,16 @@ damager::damager(const std::string& name, double hp, team team,
 damager::~damager() {}
 
 void damager::doNormalAttack(entity* target) {
-  std::cout << m_name << " attacks " << target->getName() << " for "
-            << m_attackDamage << " damage\n";
+  const bool wasAlive = target->isAlive();
+  std::println("{} attacks {} for {} damage", m_name, target->getName(),
+               m_attackDamage);
   target->takeDamage(m_attackDamage);
-  std::cout << target->getName() << "'s health is now " << target->getHP()
-            << "\n";
+  restoreActionPoints();
+  std::println("{}'s health is now {}", target->getName(), target->getHP());
 
-  if (!target->isAlive()) {
-    std::cout << target->getName() << " has been slain!\n";
+  if (wasAlive && !target->isAlive()) {
+    restoreActionPoints();
+    std::println("{} has been slain!", target->getName());
   }
 }
 bool damager::doNormalAction(entity* target) {
@@ -29,9 +31,23 @@ bool damager::doNormalAction(entity* target) {
   }
 
   if (target->getTeam() == getTeam()) {
-    std::cout << "Cannot attack an ally!\n";
+    std::println("Cannot attack an ally!");
     return false;
   }
   doNormalAttack(target);
+  return true;
+}
+
+bool damager::doSpecialAction(entity* target) {
+  if (!isAlive() || !target || !target->isAlive() ||
+      target->getTeam() == getTeam()) {
+    return false;
+  }
+  if (!spendActionPoints(getMaxActionPoints())) {
+    std::println("{} does not have enough action points.", m_name);
+    return false;
+  }
+
+  doSpecialAttack(target);
   return true;
 }

@@ -12,6 +12,7 @@ class damager : public entity {
   virtual ~damager();
 
   bool doNormalAction(entity* target) override;
+  bool doSpecialAction(entity* target) override;
 
   virtual void doNormalAttack(entity* target);
   virtual void doSpecialAttack(entity*) = 0;
