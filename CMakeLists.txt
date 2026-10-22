@@ -20,6 +20,9 @@ add_library(app_lib
     src/cleric.cpp
     src/druid.cpp
     src/paladin.cpp
+    src/magician.cpp
+    src/knight.cpp
+    src/berserker.cpp
     src/game_engine.cpp
 )
 

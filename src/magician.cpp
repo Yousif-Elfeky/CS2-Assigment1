@@ -20,25 +20,6 @@ void magician::doSpecialAttack(entity* target) {
   }
 }
 
-//Magic Missiles
-void magician::doMagicMissles(std::vector<std::unique_ptr<entity>>& allEnemies) 
-{
-  std::cout << m_name << " unleashes a barrage of magic missiles at all enemies\n";
-
-  for (const auto& entityPtr : allEnemies) {
-    if (entityPtr->isAlive() && entityPtr->getTeam() != m_team) {
-      std::cout << " A magic missile blasts " << entityPtr->getName() << " for " << m_specialDamage << " damage\n";
-      entityPtr->takeDamage(m_specialDamage);
-
-      if (!entityPtr->isAlive()) {
-        std::cout << "  - " << entityPtr->getName() << " was blasted by a magic missile\n";
-      } else {
-        std::cout << "  - " << entityPtr->getName() << "'s health is now " << entityPtr->getHP() << "\n";
-      }
-    }
-  }
-}
-
 bool magician::doSpecialAction(entity* target) 
 {
   if (!isAlive() || !target || !target->isAlive() || target->getTeam() == getTeam()) {
@@ -54,26 +35,13 @@ bool magician::doSpecialAction(entity* target)
   return true;
 }
 
-bool magician::doMultiTargetSpecialAction(std::vector<std::unique_ptr<entity>>& allEntities) 
-{
-  if (!isAlive()) {
-    return false;
-  }
-
-  if (!spendActionPoints(getMaxActionPoints())) {
-    std::cout << m_name << " does not have enough action points.\n";
-    return false;
-  }
-  doMagicMissles(allEntities);
-  return true;
-}
 
 void magician::print() const {
   std::cout << "[Magician] ID: " << m_id << " | Name: " << m_name
             << " | HP: " << m_hp 
             << " | Attack Damage: " << (m_attackDamage)
             << " | Special Damage: " << m_specialDamage << "\n"
-            << " | Special: Fireball(Single-Target) or Magic Missiles(Multi-hit)\n"
+            << " | Special: Fireball(Single-Target)\n"
             << " | A wizard with basic attacks, a special Fireball that hits one \n"
-            << "   target, and special Magic Missiles that hit all available targets.\n";
+            << "   target.\n";
 }
