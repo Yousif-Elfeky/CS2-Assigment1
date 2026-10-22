@@ -30,6 +30,7 @@ class GameEngine {
 
   bool hasPlayer() const;
   bool hasEnvironment() const;
+  void regenerateHealers();
   void prepareRound();
   void doEndOfRound();
 

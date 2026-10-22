@@ -4,12 +4,12 @@
 
 #include "entity.hpp"
 
-// abstract base for all healing entities, where the mana is not per entity but
-// rather shared between them. This class contorols that flow of mana.
+// abstract base for all healing entities, which can heal allies and themselves.
 class healer : public entity {
  protected:
   double m_healPower;
   double m_mana;
+  double m_maxMana;
 
   bool spendMana(double);
 
@@ -25,5 +25,9 @@ class healer : public entity {
 
   bool doNormalAction(entity* target) override;
 
+  void regenMana(double amount);
+
   double getMana() const;
+
+  double getMaxMana() const;
 };

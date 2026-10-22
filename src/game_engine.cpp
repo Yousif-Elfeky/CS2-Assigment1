@@ -6,6 +6,8 @@
 #include <sstream>
 #include <string>
 
+#include "healer.hpp"
+
 void GameEngine::addEntity(std::unique_ptr<entity> entity) {
   if (entity) {
     m_entities.push_back(std::move(entity));
@@ -81,6 +83,20 @@ bool GameEngine::hasEnvironment() const {
   }
   return false;
 }
+void GameEngine::regenerateHealers() {
+  for (const auto& e : m_entities) {
+    auto* currentHealer = dynamic_cast<healer*>(e.get());
+    if (!currentHealer || !currentHealer->isAlive()) continue;
+
+    const double manaBefore = currentHealer->getMana();
+    currentHealer->regenMana(currentHealer->getMaxMana() / 2.0);
+    const double manaRestored = currentHealer->getMana() - manaBefore;
+
+    std::println("{} regenerates {} mana ({}/{}).", currentHealer->getName(),
+                 manaRestored, currentHealer->getMana(),
+                 currentHealer->getMaxMana());
+  }
+}
 bool GameEngine::isGameOver() const {
   return !hasPlayer() || !hasEnvironment();
 }
@@ -124,6 +140,10 @@ void GameEngine::doEndOfRound() {
   std::println("==================== End of Round {} ====================",
                m_round);
   printEntities();
+  if (m_round % 3 == 0) {
+    std::println("--- Mana Regeneration ---");
+    regenerateHealers();
+  }
 }
 int GameEngine::run() {
   std::println("\n==================== Game Start ====================");
