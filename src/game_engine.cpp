@@ -257,6 +257,22 @@ entity* GameEngine::selectTarget(const std::vector<const entity*>& candidates) {
   return selectedTarget;
 }
 bool GameEngine::playerTurn(entity* currentEntity) {
+  if (dynamic_cast<const healer*>(currentEntity)) {
+    std::println("\n1. Heal");
+    std::println("2. Skip turn and conserve mana");
+
+    int healerChoice = 1;
+    if (!readChoice("Action: ", 1, 2, healerChoice)) {
+      std::println("No action selected. Skipping turn.");
+      return false;
+    }
+    if (healerChoice == 2) {
+      std::println("{} skips the turn and conserves mana.",
+                   currentEntity->getName());
+      return true;
+    }
+  }
+
   auto candidates = getValidTargets(currentEntity);
 
   if (candidates.empty()) {
