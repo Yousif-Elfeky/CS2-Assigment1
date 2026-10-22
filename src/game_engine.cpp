@@ -102,9 +102,12 @@ bool GameEngine::isGameOver() const {
 }
 void GameEngine::printEntities() const {
   std::println();
-  std::println("  ID   {:<24}{:<16}{:<14}Status", "Name", "Team", "Health");
+  std::println("  ID   {:<24}{:<16}{:<18}{:<14}Status", "Name", "Team",
+               "Health", "Mana");
   std::println(
-      "  ---------------------------------------------------------------");
+      "  "
+      "------------------------------------------------------------------------"
+      "-----");
 
   for (const auto& e : m_entities) {
     if (!e) continue;
@@ -112,9 +115,21 @@ void GameEngine::printEntities() const {
     const char* teamName =
         e->getTeam() == team::player ? "Player" : "Environment";
     const char* status = e->isAlive() ? "Active" : "Defeated";
+    const auto* currentHealer = dynamic_cast<const healer*>(e.get());
 
-    std::println("  {:>3}   {:<24}{:<16}{:>5.1f} / {:<5.1f}  {}", e->getID(),
-                 e->getName(), teamName, e->getHP(), e->getMaxHP(), status);
+    if (currentHealer) {
+      std::println(
+          "  {:>3}   {:<24}{:<16}{:>5.1f} / {:<5.1f}  "
+          "{:>5.1f} / {:<5.1f}  {:>9}",
+          e->getID(), e->getName(), teamName, e->getHP(), e->getMaxHP(),
+          currentHealer->getMana(), currentHealer->getMaxMana(), status);
+    } else {
+      std::println(
+          "  {:>3}   {:<24}{:<16}{:>5.1f} / {:<5.1f}  "
+          "{:<18}{}",
+          e->getID(), e->getName(), teamName, e->getHP(), e->getMaxHP(), "-",
+          status);
+    }
   }
 
   std::println();
@@ -212,8 +227,15 @@ entity* GameEngine::selectTarget(const std::vector<const entity*>& candidates) {
   for (std::size_t i = 0; i < candidates.size(); ++i) {
     const entity* e = candidates[i];
 
-    std::println("{}. {} (ID: {}, HP: {}/{})", i + 1, e->getName(), e->getID(),
-                 e->getHP(), e->getMaxHP());
+    const auto* currentHealer = dynamic_cast<const healer*>(e);
+    if (currentHealer) {
+      std::println("{}. {} (ID: {}, HP: {}/{}, Mana: {}/{})", i + 1,
+                   e->getName(), e->getID(), e->getHP(), e->getMaxHP(),
+                   currentHealer->getMana(), currentHealer->getMaxMana());
+    } else {
+      std::println("{}. {} (ID: {}, HP: {}/{})", i + 1, e->getName(),
+                   e->getID(), e->getHP(), e->getMaxHP());
+    }
   }
 
   int choice;
