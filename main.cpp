@@ -62,24 +62,35 @@ void addBalancedPreset(GameEngine& game) {
                                            team::player, 20, 30, 1));
   game.addEntity(
       std::make_unique<cleric>("Player Cleric", 90.0, team::player, 25, 100));
+  game.addEntity(std::make_unique<knight>("Player Knight", 150.0, team::player,
+                                          25, 35, 1));
+
   game.addEntity(std::make_unique<warrior>("Enemy Warrior", 200.0,
                                            team::environment, 30, 25, 1));
   game.addEntity(std::make_unique<druid>("Enemy Druid", 100.0,
                                          team::environment, 20, 100));
+  game.addEntity(std::make_unique<magician>("Enemy Magician", 80.0,
+                                            team::environment, 15, 100));
 }
 
 void addOffensivePreset(GameEngine& game) {
   game.addEntity(std::make_unique<warrior>("Player Warrior", 110.0,
                                            team::player, 25, 35, 1));
-  game.addEntity(std::make_unique<warrior>("Player Warrior 2", 100.0,
-                                           team::player, 30, 40, 1));
+  game.addEntity(std::make_unique<magician>("Player Magician", 80.0,
+                                            team::player, 20, 100));
+  game.addEntity(std::make_unique<berserker>("Player Berserker", 90.0,
+                                             team::player, 30, 40, 1));
   game.addEntity(std::make_unique<warrior>("Enemy Warrior", 150.0,
                                            team::environment, 25, 30, 1));
   game.addEntity(
       std::make_unique<druid>("Enemy Druid", 80.0, team::environment, 18, 90));
+  game.addEntity(std::make_unique<cleric>("Enemy Cleric", 90.0,
+                                          team::environment, 22, 100));
 }
 
 void addDefensivePreset(GameEngine& game) {
+  game.addEntity(std::make_unique<knight>("Player Knight", 160.0, team::player,
+                                          25, 35, 1));
   game.addEntity(
       std::make_unique<paladin>("Player Paladin", 140.0, team::player, 18, 90));
   game.addEntity(

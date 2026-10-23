@@ -6,7 +6,7 @@ druid::druid(const std::string& name, double hp, team team, double healPower,
              double mana)
     : healer(name, hp, team, healPower, mana) {}
 
-double druid::healManaCost() const { return 15.0; }
+double druid::healManaCost() const { return 25.0; }
 
 const char* druid::healName() const { return "Regrowth"; }
 
@@ -21,8 +21,8 @@ void druid::applyHealing(entity* target) {
   const double targetHealed = target->getHP() - targetBefore;
   const double selfHealed = getHP() - selfBefore;
 
-  std::println("{} uses {} on {} (+{} HP) and gains {} HP.", m_name,
-               healName(), target->getName(), targetHealed, selfHealed);
+  std::println("{} uses {} on {} (+{} HP) and gains {} HP.", m_name, healName(),
+               target->getName(), targetHealed, selfHealed);
 }
 
 void druid::print() const {
