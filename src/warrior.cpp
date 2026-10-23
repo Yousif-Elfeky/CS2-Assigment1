@@ -22,6 +22,20 @@ void warrior::doSpecialAttack(entity* target) {
   }
 }
 
+bool warrior::doSpecialAction(entity* target) 
+{
+  if (!isAlive() || !target || !target->isAlive() || target->getTeam() == getTeam()) {
+    return false;
+  }
+
+  if (!spendActionPoints(getMaxActionPoints())) {
+    std::println("{} does not have enough action points.", m_name);
+    return false;
+  }
+  doSpecialAttack(target);
+  return true;
+}
+
 void warrior::print() const {
   std::println("[Warrior] ID: {} | Name: {} | HP: {} | Attack Damage: {}",
                m_id, m_name, m_hp, m_attackDamage);

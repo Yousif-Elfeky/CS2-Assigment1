@@ -101,8 +101,8 @@ bool GameEngine::isGameOver() const {
 }
 void GameEngine::printEntities() const {
   std::println();
-  std::println("  ID   {:<24}{:<16}{:<18}{:<14}{:<10}Status", "Name",
-               "Team", "Health", "Mana", "AP");
+  std::println("  ID   {:<24}{:<16}{:<18}{:<14}{:<10}Status", "Name", "Team",
+               "Health", "Mana", "AP");
   std::println(
       "  "
       "------------------------------------------------------------------------"
@@ -119,7 +119,7 @@ void GameEngine::printEntities() const {
     if (currentHealer) {
       std::println(
           "  {:>3}   {:<24}{:<16}{:>5.1f} / {:<5.1f}  "
-          "{:>5.1f} / {:<5.1f}  {:>2} / {:<2}  {}",
+          "{:>5.1f} / {:<5.1f}  {:>5} / {:<2}  {}",
           e->getID(), e->getName(), teamName, e->getHP(), e->getMaxHP(),
           currentHealer->getMana(), currentHealer->getMaxMana(),
           e->getActionPoints(), entity::getMaxActionPoints(), status);
@@ -167,6 +167,9 @@ int GameEngine::run() {
                  m_round);
     prepareRound();
 
+    if (m_round == 1) {
+      printEntities();
+    }
     while (!m_turnQueue.empty()) {
       size_t currentID = m_turnQueue.front();
       m_turnQueue.pop();
@@ -300,9 +303,9 @@ bool GameEngine::playerTurn(entity* currentEntity) {
                  entity::getMaxActionPoints());
   }
 
-  const bool actionSucceeded =
-      actionChoice == 2 ? currentEntity->doSpecialAction(target)
-                        : currentEntity->doNormalAction(target);
+  const bool actionSucceeded = actionChoice == 2
+                                   ? currentEntity->doSpecialAction(target)
+                                   : currentEntity->doNormalAction(target);
   if (!actionSucceeded) {
     std::println("Action failed.");
   }
@@ -318,12 +321,11 @@ void GameEngine::environmentTurn(entity* currentEntity) {
   // healer logic: heal the ally with the lowest HP
   if (currentEntity->getTarget() == targetType::ally) {
     std::vector<const entity*> injuredAllies;
-    std::copy_if(
-        candidates.begin(), candidates.end(),
-        std::back_inserter(injuredAllies),
-        [](const entity* candidate) {
-          return candidate->getHP() < candidate->getMaxHP();
-        });
+    std::copy_if(candidates.begin(), candidates.end(),
+                 std::back_inserter(injuredAllies),
+                 [](const entity* candidate) {
+                   return candidate->getHP() < candidate->getMaxHP();
+                 });
 
     if (injuredAllies.empty()) {
       std::println("{} has no injured allies to heal.",

@@ -38,10 +38,10 @@ class entity {
   bool isEnemy() const;
   team getTeam() const;
   targetType getTarget() const;
-  void takeDamage(double);
+  virtual void takeDamage(double);
   void receiveHealing(double);
   int getActionPoints() const;
-  static constexpr int getMaxActionPoints() { return 3; }
+  static constexpr int getMaxActionPoints() { return 5; }
   bool spendActionPoints(int amount);
   void restoreActionPoints(int amount = 1);
   void skipNextTurn();
